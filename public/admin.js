@@ -2,7 +2,7 @@
 import { S, t, esc, api, post, errText, catName, matName, condName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, sheet, pickSheet, compressPhoto, name } from './core.js';
 
 const x = (k, p) => esc(t(k, p));
-const TABS = ['summary', 'scan', 'drops', 'pickups', 'returns', 'intake', 'users', 'impact', 'settings', 'audit'];
+const TABS = ['summary', 'scan', 'drops', 'pickups', 'returns', 'support', 'intake', 'users', 'impact', 'settings', 'audit'];
 let root; let counts = {};
 
 const emptyBox = () => `<div class="card center muted">${x('a_empty')}</div>`;
@@ -49,7 +49,7 @@ const set = (html) => { const m = document.getElementById('amain'); if (m) m.inn
 async function loadCounts() {
   try {
     const s = await api('/api/admin/summary');
-    counts = { drops: s.pending_drops, pickups: s.pending_pickups, returns: s.pending_returns };
+    counts = { drops: s.pending_drops, pickups: s.pending_pickups, returns: s.pending_returns, support: s.pending_support };
     return s;
   } catch { return null; }
 }
@@ -104,6 +104,14 @@ async function returns() {
   set(`<h1 style="margin-bottom:14px">${x('a_returns')}</h1>${rs.length ? `<div class="queue">${rs.map((r) => `<div class="card stack">${thumbs(r.item)}<div>${itemLine(r.item)}</div>
     <div class="small muted">${x('a_buyer')}: ${esc(r.buyer.display_name)}<br>${x('a_return_reason')}: ${esc(r.reason)}<br>${x('a_refund')}: ${fmt(r.amount)} ${x('points')}<br>${x('a_time_left', { t: left(r.until) })}</div>
     <div class="row"><button class="btn small green" style="flex:1;width:100%" data-approve-ret="${esc(r.id)}">${x('a_approve')}</button><button class="btn small danger" style="flex:1;width:100%" data-reject-ret="${esc(r.id)}">${x('a_reject')}</button></div></div>`).join('')}</div>` : emptyBox()}`);
+}
+
+// ---------- Destek ve hesap kapatma talepleri ----------
+async function support() {
+  const { requests: rs } = await api('/api/admin/support');
+  set(`<h1 style="margin-bottom:14px">${x('a_support')}</h1>${rs.length ? `<div class="queue">${rs.map((r) => `<div class="card stack"><span class="pill ${r.kind === 'close_account' ? 'p-wait' : 'p-info'}" style="align-self:flex-start">${x(`support_kind_${r.kind}`)}</span>
+    <div><b>${esc(r.display_name)}</b><div class="small muted">${esc(r.email)}, ${esc(when(r.created_at))}</div></div>${r.message ? `<p style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(r.message)}</p>` : ''}
+    <button class="btn small green" data-support-done="${esc(r.id)}">${x('a_support_done')}</button></div>`).join('')}</div>` : emptyBox()}`);
 }
 
 // ---------- QR okutma ----------
@@ -256,7 +264,7 @@ async function audit() {
     ${entries.map((e) => `<tr><td style="white-space:nowrap">${when(e.created_at)}</td><td>${esc(e.actor || t('a_system'))}</td><td>${esc(e.entity_type)}: ${esc(e.action)}</td><td>${esc(e.old_value ?? '')}${e.new_value != null ? ` / ${esc(e.new_value)}` : ''}</td><td>${esc(e.reason ?? '')}</td></tr>`).join('')}</tbody></table></div>`);
 }
 
-const VIEWS = { summary, drops, pickups, returns, users, impact, settings, audit };
+const VIEWS = { support, summary, drops, pickups, returns, users, impact, settings, audit };
 
 export async function renderAdmin(app, a, b) {
   root = app;
@@ -279,6 +287,7 @@ document.addEventListener('click', async (e) => {
   const q = (s) => e.target.closest(s); let el;
   if ((el = q('[data-approve-drop]'))) await approveDropFlow(el.dataset.approveDrop, el.dataset.cond);
   else if ((el = q('[data-reject-drop]'))) await rejectDropFlow(el.dataset.rejectDrop);
+  else if ((el = q('[data-support-done]'))) { const r = await reasonSheet(t('a_support_done'), [t('a_preset_replied')], { okLabel: t('a_support_done') }); if (r) await act(() => post(`/api/admin/support/${el.dataset.supportDone}/close`, r)); }
   else if ((el = q('[data-approve-pick]'))) { const r = await reasonSheet(t('a_approve_qr'), [t('a_preset_pick')], { okLabel: t('a_approve_qr') }); if (r) await act(() => post(`/api/admin/reservations/${el.dataset.approvePick}/approve`, r)); }
   else if ((el = q('[data-reject-pick]'))) { const r = await reasonSheet(t('a_reject'), [t('a_preset_unavail')], { okLabel: t('a_reject'), danger: true }); if (r) await act(() => post(`/api/admin/reservations/${el.dataset.rejectPick}/reject`, r)); }
   else if ((el = q('[data-approve-ret]'))) { const r = await reasonSheet(t('a_approve'), [t('a_preset_back')], { extra: `<label class="row strong"><input type="checkbox" data-extra="republish"> ${x('a_republish')}</label>` }); if (r) await act(() => post(`/api/admin/returns/${el.dataset.approveRet}/approve`, r)); }

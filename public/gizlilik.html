@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LoopWear gizlilik</title>
+<meta name="theme-color" content="#FCF8ED">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/assets/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="LoopWear">
+<link rel="stylesheet" href="/style.css">
+<style>
+#doc h2{font-size:15px;font-weight:800;margin:20px 0 6px;color:var(--navy,#2B3A4A)}
+#doc p,#doc li{font-size:14px;line-height:1.55}
+#doc ul{padding-left:20px;margin:6px 0}
+#doc li{margin-bottom:4px}
+</style>
+</head>
+<body>
+<div id="app"><div class="screen">
+  <div class="backbar"><div class="logo-wordmark">L<span class="lp">oo</span>pWear</div><div class="lang"><button data-l="tr">TR</button><button data-l="en">EN</button></div></div>
+  <div class="content bare">
+    <h1 id="title" class="page-title"></h1>
+    <div id="doc"></div>
+    <div style="padding:24px 0 36px"><a class="btn line navy" id="back" href="/" style="text-decoration:none"></a></div>
+  </div>
+</div></div>
+<script>
+const T = {
+  tr: {
+    title: 'Gizlilik', back: 'Uygulamaya dön',
+    doc: [
+      ['p', 'Bu metin, LoopWear uygulamasını kullanırken hangi bilgilerinin nasıl işlendiğini anlatır. Uygulamayı LoopWear ekibi işletir.'],
+      ['h', 'Hangi bilgileri saklıyoruz?'],
+      ['u', ['E-posta adresin ve seçtiğin görünen ad.', 'Parolan, geri çevrilemeyen özet hâliyle. Ekip parolanı göremez.', 'Eklediğin ürünlerin bilgileri ve fotoğrafları.', 'Puan hareketlerin, rezervasyonların, iadelerin ve değerlendirmelerin.', 'Uygulama içi bildirimlerin ve destek taleplerin.']],
+      ['h', 'Neden kullanıyoruz?'],
+      ['p', 'Hesabını açmak, kıyafet bırakma ve alma işlemlerini yürütmek, puanını hesaplamak, sana bildirim göstermek ve kötüye kullanımı önlemek için.'],
+      ['h', 'Kim görebilir?'],
+      ['u', ['Ürün bilgileri ve fotoğrafları diğer üyelere gösterilir. Fotoğraflarda kişisel bilgi bulunmamasına dikkat et.', 'Bırakan kişinin kimliği diğer üyelere gösterilmez, değerlendirmeler anonimdir.', 'Yetkili ekip üyeleri, işlemleri yürütmek için hesap bilgilerini ve işlem geçmişini görebilir.']],
+      ['h', 'Nerede saklanıyor?'],
+      ['p', 'Veriler, Render altyapısında Frankfurt (Almanya) bölgesindeki sunucu ve veritabanında tutulur. Bu nedenle Türkiye dışında saklanır.'],
+      ['h', 'Çerez ve takip'],
+      ['p', 'Yalnızca oturumunu açık tutan bir çerez kullanılır. Reklam veya üçüncü taraf analiz aracı kullanılmaz. Kısa sürede çok sayıda hesap açılmasını engellemek için IP adresin kullanılır; barındırma hizmetinin sunucu kayıtlarında da yer alabilir.'],
+      ['h', 'Hakların'],
+      ['p', 'Verilerin hakkında bilgi isteyebilir, düzeltilmesini veya silinmesini talep edebilirsin. Bunun için uygulamada Profil > Destek bölümünü kullan. Hesabını kapatmak için aynı yerden talep gönderebilirsin.'],
+    ],
+  },
+  en: {
+    title: 'Privacy', back: 'Back to the app',
+    doc: [
+      ['p', 'This page explains what information LoopWear processes when you use the app and how. The app is run by the LoopWear team.'],
+      ['h', 'What we store'],
+      ['u', ['Your email address and the display name you choose.', 'Your password, as a one-way hash. The team can’t see it.', 'Details and photos of the items you add.', 'Your point history, reservations, returns and ratings.', 'Your in-app notifications and support requests.']],
+      ['h', 'Why we use it'],
+      ['p', 'To open your account, run drop-offs and pickups, calculate your points, show you notifications and prevent abuse.'],
+      ['h', 'Who can see it'],
+      ['u', ['Item details and photos are shown to other members. Make sure your photos contain no personal information.', 'The identity of the person who dropped an item isn’t shown to other members, and ratings are anonymous.', 'Authorized team members can see account details and history to run operations.']],
+      ['h', 'Where it’s stored'],
+      ['p', 'Data is kept on servers and a database on Render in the Frankfurt (Germany) region, which means outside Türkiye.'],
+      ['h', 'Cookies and tracking'],
+      ['p', 'We only use one cookie, to keep you signed in. There are no ads or third-party analytics. Your IP address is used to block many sign-ups in a short time, and it may also appear in the hosting provider’s server logs.'],
+      ['h', 'Your rights'],
+      ['p', 'You can ask about your data and request that it be corrected or deleted. Use Profile > Support in the app. You can send an account closure request from the same place.'],
+    ],
+  },
+};
+let lang = 'tr';
+try { lang = localStorage.getItem('lw_lang') || ((navigator.language || '').startsWith('tr') ? 'tr' : 'en'); } catch { lang = (navigator.language || '').startsWith('tr') ? 'tr' : 'en'; }
+const esc = (s) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+function render() {
+  const t = T[lang] || T.tr;
+  document.documentElement.lang = lang;
+  document.getElementById('title').textContent = t.title;
+  document.getElementById('back').textContent = t.back;
+  document.querySelectorAll('[data-l]').forEach((b) => b.classList.toggle('on', b.dataset.l === lang));
+  document.getElementById('doc').innerHTML = t.doc.map(([k, v]) => (k === 'h' ? `<h2>${esc(v)}</h2>` : k === 'p' ? `<p>${esc(v)}</p>` : `<ul>${v.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`)).join('');
+}
+document.querySelectorAll('[data-l]').forEach((b) => b.addEventListener('click', () => { lang = b.dataset.l; render(); }));
+render();
+</script>
+</body>
+</html>

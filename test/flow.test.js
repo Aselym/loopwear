@@ -134,6 +134,45 @@ test('K5: READY süresiz kalır ve eşzamanlı istekte yalnızca biri rezerve ed
   assert.equal(balances.filter((b) => b === 120).length, 2);
 });
 
+test('K5: 20 kişi aynı anda istese de ürün tek kişiye gider, puan yalnızca ondan düşer', async () => {
+  const u = await member();
+  const item = await ready(u);
+  const buyers = [];
+  for (let i = 0; i < 20; i += 1) buyers.push(await member());
+  for (const b of buyers) await admin.post(`/api/admin/users/${b.id}/points`, { amount: 100, reason: 'test' });
+  const results = await Promise.all(buyers.map((b) => b.post(`/api/items/${item.id}/reserve`)));
+  assert.equal(results.filter((r) => r.status === 200).length, 1);
+  const balances = await Promise.all(buyers.map(balance));
+  assert.equal(balances.filter((b) => b === 40).length, 1);
+  assert.equal(balances.filter((b) => b === 120).length, 19);
+  const [{ n }] = await db.q("SELECT count(*)::int AS n FROM reservations WHERE item_id=$1", [item.id]);
+  assert.equal(n, 1);
+});
+
+test('destek ve hesap kapatma talebi yöneticiye ulaşır, gerekçeyle kapanır, üyeye bildirim gider', async () => {
+  const u = await member(); const other = await member();
+  assert.equal((await u.post('/api/support', { kind: 'support', message: '  ' })).data.error, 'message_required');
+  const s = await u.post('/api/support', { kind: 'support', message: 'Puanım görünmüyor' });
+  assert.equal(s.status, 200);
+  const c1 = await u.post('/api/support', { kind: 'close_account' });
+  const c2 = await u.post('/api/support', { kind: 'close_account' });
+  assert.equal(c1.data.id, c2.data.id);
+  assert.equal((await other.get('/api/me/support')).data.requests.length, 0);
+  assert.equal((await u.get('/api/admin/support')).status, 403);
+  assert.equal((await u.post(`/api/admin/support/${s.data.id}/close`, { reason: 'x' })).status, 403);
+  const list = (await admin.get('/api/admin/support')).data.requests;
+  assert.ok(list.some((r) => r.id === s.data.id && r.message === 'Puanım görünmüyor'));
+  assert.ok((await admin.get('/api/admin/summary')).data.pending_support >= 2);
+  assert.equal((await admin.post(`/api/admin/support/${s.data.id}/close`, {})).data.error, 'reason_required');
+  assert.equal((await admin.post(`/api/admin/support/${s.data.id}/close`, { reason: 'Puanın düzeltildi' })).status, 200);
+  assert.equal((await admin.post(`/api/admin/support/${s.data.id}/close`, { reason: 'tekrar' })).status, 409);
+  const notes = (await u.get('/api/me/notifications')).data.notifications;
+  assert.ok(notes.some((x) => x.kind === 'support_closed' && x.params.reason === 'Puanın düzeltildi'));
+  const statuses = (await u.get('/api/me/support')).data.requests;
+  assert.equal(statuses.find((r) => r.id === s.data.id).status, 'CLOSED');
+  assert.equal((await new Client().get('/gizlilik')).status, 200);
+});
+
 test('K6: rezervasyonda puan düşer, reddedilirse aynı tutar iade edilir; yetersiz ve kendi ürünü engellenir', async () => {
   const u = await member(); const b = await member();
   const item = await ready(u);

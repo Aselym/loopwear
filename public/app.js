@@ -84,6 +84,7 @@ function authForm(mode) {
       <div class="err" hidden style="margin-bottom:12px"></div>
       <button class="btn" type="submit">${x(reg ? 'create_account' : 'log_in')}</button>
       <p class="center muted" style="margin-top:14px">${x(reg ? 'have_account' : 'no_account')} <a class="link" href="#/${reg ? 'login' : 'register'}">${x(reg ? 'log_in' : 'create_account')}</a></p>
+      ${reg ? `<p class="center muted" style="margin-top:10px;font-size:12.5px"><a class="link" href="/gizlilik">${x('privacy')}</a></p>` : ''}
     </form></div>`);
   const f = document.getElementById('authForm');
   f.addEventListener('submit', async (e) => {
@@ -481,7 +482,7 @@ async function profile() {
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
     <h2 class="section-title">LoopWear</h2>
-    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
+    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
     ${u.role === 'admin' ? `<div class="card" style="border-color:var(--coral)">${row(IC.shield, t('admin_panel'), '#/admin')}</div>` : ''}
     <button class="center" style="width:100%;color:var(--coral);font-weight:800;padding:10px 0 20px" data-logout>${x('log_out')}</button></div>`);
 }
@@ -492,6 +493,23 @@ async function wallet() {
     const { transactions: tx } = await api('/api/me/transactions');
     document.getElementById('tx').innerHTML = `${pointsCard(S.user).replace('href="#/wallet"', '')}${tx.length ? `<div class="card">${tx.map((r, i) => `${i ? '<div class="divider" style="margin:6px 0"></div>' : ''}<div class="fin"><span><span style="display:block;font-weight:700;font-size:13.5px">${x(`tx_${r.type}`)}</span><span class="muted" style="font-size:11.5px">${when(r.created_at)}</span></span><span class="strong" style="color:${r.amount > 0 ? 'var(--sage-dark)' : 'var(--coral)'}">${r.amount > 0 ? '+' : '−'}${fmt(Math.abs(r.amount))}</span></div>`).join('')}</div>` : `<p class="muted">${x('no_tx')}</p>`}`;
   } catch { document.getElementById('tx').innerHTML = errorBox(); }
+}
+
+async function support() {
+  screen(`${titleBar(t('support'))}<div class="content bare">
+    <form id="sf"><div class="field"><label for="sm">${x('support_message')}</label><textarea class="input" id="sm" maxlength="1000" rows="4" required></textarea><span class="hint">${x('support_hint')}</span></div><div class="err" hidden style="margin-bottom:12px"></div><button class="btn" type="submit">${x('send')}</button></form>
+    <h2 class="section-title">${x('close_account')}</h2><p class="muted" style="margin-bottom:12px">${x('close_account_body')}</p><button class="btn line navy" data-close-account>${x('close_account_btn')}</button>
+    <div id="sl"></div></div>`);
+  const f = document.getElementById('sf');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = f.querySelector('.err'); err.hidden = true;
+    try { await post('/api/support', { kind: 'support', message: f.querySelector('textarea').value }); toast(t('support_sent')); support(); } catch (ex) { err.textContent = errText(ex); err.hidden = false; }
+  });
+  try {
+    const { requests: r } = await api('/api/me/support');
+    if (r.length) document.getElementById('sl').innerHTML = `<h2 class="section-title">${x('support_mine')}</h2><div class="card">${r.map((s, i) => `${i ? '<div class="divider" style="margin:6px 0"></div>' : ''}<div class="fin"><span><span style="display:block;font-weight:700;font-size:13.5px">${x(`support_kind_${s.kind}`)}</span><span class="muted" style="font-size:12px">${esc(when(s.created_at))}</span></span><span class="muted" style="font-size:12px">${x(`support_${s.status}`)}</span></div>`).join('')}</div>`;
+  } catch { /* liste olmadan da form çalışır */ }
 }
 
 async function notifications() {
@@ -526,7 +544,7 @@ function stations() {
 }
 
 // ---------- Yönlendirme ----------
-const authed = { home, discover, wardrobe, impact, profile, wallet, notifications, gifts, stations, favorites };
+const authed = { home, discover, wardrobe, impact, profile, wallet, notifications, gifts, stations, favorites, support };
 async function route() {
   const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   const [head = 'home', a, b] = parts;
@@ -587,7 +605,9 @@ document.addEventListener('click', async (e) => {
     else if ((el = q('[data-return]'))) { await returnFlow(el.dataset.return); }
     else if ((el = q('[data-rate]'))) { await rateFlow(el.dataset.rate); }
     else if ((el = q('[data-gift]'))) { await buyGift(el); }
-    else if (q('[data-logout]')) { await post('/api/auth/logout'); S.user = null; S.draft = null; go('#/'); }
+    else if (q('[data-close-account]')) {
+      if (await confirmSheet(t('close_account'), t('close_account_body'), t('close_account_btn'), { danger: true })) { await post('/api/support', { kind: 'close_account' }); toast(t('support_sent')); support(); }
+    } else if (q('[data-logout]')) { await post('/api/auth/logout'); S.user = null; S.draft = null; go('#/'); }
   } catch (ex) { toast(errText(ex)); }
 });
 

@@ -359,6 +359,30 @@ export async function redeemGift(db, adminId, token, { reason } = {}) {
   });
 }
 
+// ---------- Destek ve hesap kapatma talebi ----------
+export async function createSupportRequest(db, userId, { kind, message } = {}) {
+  if (!['support', 'close_account'].includes(kind)) throw new AppError('invalid_input');
+  const text = String(message || '').trim().slice(0, 1000);
+  if (kind === 'support' && !text) throw new AppError('message_required');
+  if (kind === 'close_account') {
+    const [open] = await db.q("SELECT id FROM support_requests WHERE user_id=$1 AND kind='close_account' AND status='OPEN'", [userId]);
+    if (open) return { id: open.id };
+  }
+  const id = newId();
+  await db.q('INSERT INTO support_requests (id, user_id, kind, message) VALUES ($1,$2,$3,$4)', [id, userId, kind, text || null]);
+  return { id };
+}
+
+export async function closeSupportRequest(db, adminId, id, { reason } = {}) {
+  const why = requireReason(reason);
+  return db.tx(async (t) => {
+    const [r] = await t.q("UPDATE support_requests SET status='CLOSED', closed_at=now() WHERE id=$1 AND status='OPEN' RETURNING *", [id]);
+    if (!r) throw new AppError('invalid_state', 409);
+    await audit(t, adminId, 'support', id, 'close', 'OPEN', 'CLOSED', why);
+    await notify(t, r.user_id, 'support_closed', { reason: why });
+  });
+}
+
 // ---------- Elle puan düzeltme ----------
 export async function adjustPoints(db, adminId, userId, amount, reason) {
   const why = requireReason(reason);

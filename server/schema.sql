@@ -71,6 +71,11 @@ CREATE TABLE IF NOT EXISTS audit_log (
 );
 CREATE INDEX IF NOT EXISTS audit_time ON audit_log(created_at DESC);
 CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS support_requests (
+  id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), kind TEXT NOT NULL, message TEXT,
+  status TEXT NOT NULL DEFAULT 'OPEN', created_at TIMESTAMPTZ NOT NULL DEFAULT now(), closed_at TIMESTAMPTZ
+);
+CREATE INDEX IF NOT EXISTS support_status ON support_requests(status, created_at);
 CREATE TABLE IF NOT EXISTS gifts (
   id TEXT PRIMARY KEY, name_tr TEXT NOT NULL, name_en TEXT NOT NULL, points INT NOT NULL, stock INT NOT NULL,
   active BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMPTZ NOT NULL DEFAULT now()

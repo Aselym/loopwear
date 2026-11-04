@@ -289,6 +289,12 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   route('POST', '/api/returns', member, async ({ user, body }) => L.requestReturn(db, user.id, body.reservation_id, body.reason));
   route('POST', '/api/reviews', member, async ({ user, body }) => { await L.createReview(db, user.id, body.reservation_id, body.score, body.comment); return {}; });
 
+  route('GET', '/api/me/support', member, async ({ user }) => ({ requests: await db.q('SELECT id, kind, message, status, created_at FROM support_requests WHERE user_id=$1 ORDER BY created_at DESC LIMIT 50', [user.id]) }));
+  route('POST', '/api/support', member, async ({ user, body }) => {
+    if (limited(`support:${user.id}`, 5)) throw new AppError('too_many', 429);
+    return L.createSupportRequest(db, user.id, body);
+  });
+
   route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock FROM gifts WHERE active ORDER BY points') }));
   route('POST', '/api/gifts/:id/buy', member, async ({ user, params }) => L.buyGift(db, user.id, params.id));
 
@@ -312,7 +318,8 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     const [{ moved }] = await db.q('SELECT coalesce(sum(abs(amount)),0)::int AS moved FROM transactions');
     const [{ users }] = await db.q("SELECT count(*)::int AS users FROM users WHERE role='member'");
     const [{ pending_returns: pr }] = await db.q("SELECT count(*)::int AS pending_returns FROM returns WHERE status='PENDING'");
-    return { pending_drops: by.PENDING_DROP || 0, pending_pickups: by.PENDING_PICKUP || 0, pending_returns: pr, ready: by.READY || 0, completed: by.COMPLETED || 0, points_moved: moved, users, impact: imp };
+    const [{ n: pendingSupport }] = await db.q("SELECT count(*)::int AS n FROM support_requests WHERE status='OPEN'");
+    return { pending_support: pendingSupport, pending_drops: by.PENDING_DROP || 0, pending_pickups: by.PENDING_PICKUP || 0, pending_returns: pr, ready: by.READY || 0, completed: by.COMPLETED || 0, points_moved: moved, users, impact: imp };
   });
 
   route('GET', '/api/admin/drops', admin, async ({ user }) => {
@@ -381,6 +388,8 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     const transactions = await db.q('SELECT type, amount, balance_after, reason, created_at FROM transactions WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100', [params.id]);
     return { user: u, transactions };
   });
+  route('GET', '/api/admin/support', admin, async () => ({ requests: await db.q("SELECT s.id, s.kind, s.message, s.created_at, u.display_name, u.email FROM support_requests s JOIN users u ON u.id=s.user_id WHERE s.status='OPEN' ORDER BY s.created_at") }));
+  route('POST', '/api/admin/support/:id/close', admin, async ({ user, params, body }) => { await L.closeSupportRequest(db, user.id, params.id, body); return {}; });
   route('POST', '/api/admin/users/:id/points', admin, async ({ user, params, body }) => L.adjustPoints(db, user.id, params.id, body.amount, body.reason));
 
   const impactRows = async (query) => {
@@ -469,7 +478,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   const json = (res, status, obj) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
 
   async function serveStatic(req, res, pathname) {
-    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : decodeURIComponent(pathname.slice(1));
+    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : pathname === '/gizlilik' || pathname === '/privacy' ? 'gizlilik.html' : decodeURIComponent(pathname.slice(1));
     const file = normalize(join(PUBLIC, rel));
     if (!file.startsWith(PUBLIC.replace(/[\\/]$/, '') + sep)) return json(res, 403, { error: 'forbidden' });
     try {
