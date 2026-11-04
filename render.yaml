@@ -1,6 +1,7 @@
 databases:
   - name: loopwear-db
     plan: free
+    region: frankfurt
     databaseName: loopwear
     user: loopwear
 
