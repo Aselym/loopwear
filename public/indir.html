@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>LoopWear'i telefona kur</title>
+<meta name="theme-color" content="#FCF8ED">
+<link rel="icon" href="/assets/icon-192.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="app"><div class="screen">
+  <div class="backbar"><div class="logo-wordmark">L<span class="lp">oo</span>pWear</div><div class="lang"><button data-l="tr">TR</button><button data-l="en">EN</button></div></div>
+  <div class="content center-col" style="justify-content:center;padding-bottom:0">
+    <img class="mascot" src="/assets/loopy-hero.png" style="width:180px;margin-bottom:18px" alt="Loopy">
+    <h1 id="title" class="page-title"></h1>
+    <div id="steps" class="muted" style="font-size:14px;max-width:300px;text-align:left"></div>
+  </div>
+  <div class="stack" id="cta" style="padding:20px 20px 36px"></div>
+</div></div>
+<script>
+const T = {
+  tr: { title: 'LoopWear’i telefonuna kur', android: 'Android uygulamasını indir', open: 'Tarayıcıda aç', apk: 'İndirdikten sonra dosyayı aç. Telefon izin isterse "Bu kaynaktan izin ver" seç.', ios: ['Bu sayfayı Safari’de aç.', 'Alttaki Paylaş düğmesine dokun.', '"Ana Ekrana Ekle"yi seç.'], iosOpen: 'Uygulamayı aç', other: 'Telefonunla bu adresi aç ya da hemen tarayıcıda kullan.' },
+  en: { title: 'Get LoopWear on your phone', android: 'Download the Android app', open: 'Open in browser', apk: 'Open the file after downloading. If your phone asks, choose "Allow from this source".', ios: ['Open this page in Safari.', 'Tap the Share button at the bottom.', 'Choose "Add to Home Screen".'], iosOpen: 'Open the app', other: 'Open this address on your phone, or use it in your browser now.' },
+};
+let lang = (navigator.language || '').startsWith('tr') ? 'tr' : 'en';
+const ua = navigator.userAgent;
+const ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const android = /Android/.test(ua);
+const a = (href, cls, text, extra = '') => `<a class="btn ${cls}" href="${href}" ${extra} style="text-decoration:none">${text}</a>`;
+function render(hasApk) {
+  const t = T[lang];
+  document.documentElement.lang = lang;
+  document.title = t.title;
+  document.getElementById('title').textContent = t.title;
+  document.querySelectorAll('[data-l]').forEach((b) => b.classList.toggle('on', b.dataset.l === lang));
+  const steps = document.getElementById('steps'); const cta = document.getElementById('cta');
+  if (ios) {
+    steps.innerHTML = `<ol style="padding-left:20px;margin:0">${t.ios.map((s) => `<li style="margin-bottom:6px">${s}</li>`).join('')}</ol>`;
+    cta.innerHTML = a('/', '', t.iosOpen);
+  } else if (android && hasApk) {
+    steps.textContent = t.apk;
+    cta.innerHTML = a('/LoopWear.apk', '', t.android, 'download') + a('/', 'line navy', t.open);
+  } else {
+    steps.textContent = android ? '' : t.other;
+    cta.innerHTML = a('/', '', t.open);
+  }
+}
+let hasApk = false;
+document.querySelectorAll('[data-l]').forEach((b) => b.addEventListener('click', () => { lang = b.dataset.l; render(hasApk); }));
+render(false);
+fetch('/LoopWear.apk', { method: 'HEAD' }).then((r) => { hasApk = r.ok; render(hasApk); }).catch(() => {});
+</script>
+</body>
+</html>

@@ -1,0 +1,442 @@
+{
+ "scoring_version": "v0.1",
+ "impact_version": "v2",
+ "categories": [
+  {
+   "id": "coat",
+   "tr": "Kaban",
+   "en": "Coat",
+   "points": 60,
+   "weight": 1.06
+  },
+  {
+   "id": "puffer",
+   "tr": "Kışlık mont / şişme mont",
+   "en": "Winter / puffer jacket",
+   "points": 60,
+   "weight": 0.75
+  },
+  {
+   "id": "leather_jacket",
+   "tr": "Deri / suni deri ceket",
+   "en": "Leather / faux leather jacket",
+   "points": 55,
+   "weight": 0.75
+  },
+  {
+   "id": "trench",
+   "tr": "Trençkot / yağmurluk",
+   "en": "Trench coat / raincoat",
+   "points": 55,
+   "weight": 0.8
+  },
+  {
+   "id": "blazer",
+   "tr": "Blazer ceket",
+   "en": "Blazer",
+   "points": 50,
+   "weight": 0.31
+  },
+  {
+   "id": "denim_jacket",
+   "tr": "Kot ceket",
+   "en": "Denim jacket",
+   "points": 50,
+   "weight": 0.71
+  },
+  {
+   "id": "other_jacket",
+   "tr": "Diğer ceketler",
+   "en": "Other jackets",
+   "points": 50,
+   "weight": 0.31
+  },
+  {
+   "id": "sweater",
+   "tr": "Kazak",
+   "en": "Sweater",
+   "points": 45,
+   "weight": 0.31
+  },
+  {
+   "id": "cardigan",
+   "tr": "Hırka",
+   "en": "Cardigan",
+   "points": 45,
+   "weight": 0.31
+  },
+  {
+   "id": "sweatshirt",
+   "tr": "Sweatshirt",
+   "en": "Sweatshirt",
+   "points": 45,
+   "weight": 0.31
+  },
+  {
+   "id": "hoodie",
+   "tr": "Kapüşonlu sweatshirt",
+   "en": "Hoodie",
+   "points": 45,
+   "weight": 0.31
+  },
+  {
+   "id": "vest",
+   "tr": "Yelek",
+   "en": "Vest",
+   "points": 40,
+   "weight": 0.31
+  },
+  {
+   "id": "suit",
+   "tr": "Takım elbise",
+   "en": "Suit",
+   "points": 55,
+   "weight": 0.67
+  },
+  {
+   "id": "jeans",
+   "tr": "Jean pantolon",
+   "en": "Jeans",
+   "points": 45,
+   "weight": 0.51
+  },
+  {
+   "id": "trousers",
+   "tr": "Kumaş pantolon",
+   "en": "Trousers",
+   "points": 45,
+   "weight": 0.36
+  },
+  {
+   "id": "dress",
+   "tr": "Elbise",
+   "en": "Dress",
+   "points": 45,
+   "weight": 0.18
+  },
+  {
+   "id": "jumpsuit",
+   "tr": "Tulum",
+   "en": "Jumpsuit",
+   "points": 45,
+   "weight": 0.36
+  },
+  {
+   "id": "sweatpants",
+   "tr": "Eşofman altı",
+   "en": "Sweatpants",
+   "points": 40,
+   "weight": 0.21
+  },
+  {
+   "id": "shirt",
+   "tr": "Gömlek",
+   "en": "Shirt",
+   "points": 40,
+   "weight": 0.16
+  },
+  {
+   "id": "blouse",
+   "tr": "Bluz",
+   "en": "Blouse",
+   "points": 35,
+   "weight": 0.16
+  },
+  {
+   "id": "skirt",
+   "tr": "Etek",
+   "en": "Skirt",
+   "points": 35,
+   "weight": 0.24
+  },
+  {
+   "id": "shorts",
+   "tr": "Şort / bermuda",
+   "en": "Shorts",
+   "points": 30,
+   "weight": 0.2
+  },
+  {
+   "id": "polo",
+   "tr": "Polo yaka tişört",
+   "en": "Polo shirt",
+   "points": 30,
+   "weight": 0.25
+  },
+  {
+   "id": "longsleeve",
+   "tr": "Uzun kollu tişört",
+   "en": "Long-sleeve T-shirt",
+   "points": 30,
+   "weight": 0.16
+  },
+  {
+   "id": "tshirt",
+   "tr": "Kısa kollu tişört",
+   "en": "Short-sleeve T-shirt",
+   "points": 25,
+   "weight": 0.16
+  }
+ ],
+ "materials": [
+  {
+   "id": "acrylic",
+   "tr": "Akrilik",
+   "en": "Acrylic",
+   "co2": 64,
+   "water": 1900
+  },
+  {
+   "id": "cotton",
+   "tr": "Pamuk",
+   "en": "Cotton",
+   "co2": 85.2,
+   "water": 15000
+  },
+  {
+   "id": "leather",
+   "tr": "Deri",
+   "en": "Leather",
+   "co2": 469.4,
+   "water": 2100
+  },
+  {
+   "id": "linen",
+   "tr": "Keten",
+   "en": "Linen",
+   "co2": 63.6,
+   "water": 2500
+  },
+  {
+   "id": "polyamide",
+   "tr": "Poliamid",
+   "en": "Polyamide",
+   "co2": 72.1,
+   "water": 2000
+  },
+  {
+   "id": "polyester",
+   "tr": "Polyester",
+   "en": "Polyester",
+   "co2": 73.2,
+   "water": 1900
+  },
+  {
+   "id": "rubber",
+   "tr": "Kauçuk",
+   "en": "Rubber",
+   "co2": 17.4,
+   "water": 200
+  },
+  {
+   "id": "silk",
+   "tr": "İpek",
+   "en": "Silk",
+   "co2": 83.2,
+   "water": 13400
+  },
+  {
+   "id": "elastane",
+   "tr": "Elastan",
+   "en": "Elastane",
+   "co2": 73.1,
+   "water": 2000
+  },
+  {
+   "id": "viscose",
+   "tr": "Viskon",
+   "en": "Viscose",
+   "co2": 65.5,
+   "water": 2000
+  },
+  {
+   "id": "wool",
+   "tr": "Yün",
+   "en": "Wool",
+   "co2": 136.3,
+   "water": 2200
+  },
+  {
+   "id": "blend",
+   "tr": "Karışım",
+   "en": "Blend",
+   "co2": null,
+   "water": null
+  },
+  {
+   "id": "unknown",
+   "tr": "Diğer / bilmiyorum",
+   "en": "Other / don't know",
+   "co2": null,
+   "water": null
+  }
+ ],
+ "closed": [
+  "blazer|elastane",
+  "blazer|rubber",
+  "blouse|elastane",
+  "blouse|rubber",
+  "cardigan|elastane",
+  "cardigan|rubber",
+  "coat|elastane",
+  "coat|rubber",
+  "denim_jacket|elastane",
+  "denim_jacket|leather",
+  "denim_jacket|rubber",
+  "dress|elastane",
+  "dress|rubber",
+  "hoodie|elastane",
+  "hoodie|rubber",
+  "jeans|elastane",
+  "jeans|rubber",
+  "jumpsuit|elastane",
+  "jumpsuit|rubber",
+  "leather_jacket|acrylic",
+  "leather_jacket|cotton",
+  "leather_jacket|elastane",
+  "leather_jacket|linen",
+  "leather_jacket|polyamide",
+  "leather_jacket|polyester",
+  "leather_jacket|rubber",
+  "leather_jacket|silk",
+  "leather_jacket|viscose",
+  "leather_jacket|wool",
+  "longsleeve|elastane",
+  "longsleeve|rubber",
+  "other_jacket|elastane",
+  "other_jacket|rubber",
+  "polo|elastane",
+  "polo|rubber",
+  "puffer|elastane",
+  "puffer|rubber",
+  "shirt|elastane",
+  "shirt|rubber",
+  "shorts|elastane",
+  "shorts|rubber",
+  "skirt|elastane",
+  "skirt|rubber",
+  "suit|elastane",
+  "suit|rubber",
+  "sweater|elastane",
+  "sweater|rubber",
+  "sweatpants|elastane",
+  "sweatpants|rubber",
+  "sweatshirt|elastane",
+  "sweatshirt|rubber",
+  "trench|elastane",
+  "trench|rubber",
+  "trousers|elastane",
+  "trousers|rubber",
+  "tshirt|elastane",
+  "tshirt|rubber",
+  "vest|elastane",
+  "vest|rubber"
+ ],
+ "conditions": [
+  {
+   "id": "very_good",
+   "points": 30,
+   "tr": "Çok iyi",
+   "en": "Very good",
+   "desc_tr": "Temiz, giyime hazır; belirgin kullanım izi, solma veya tüylenme yok.",
+   "desc_en": "Clean and ready to wear; no visible wear, fading or pilling."
+  },
+  {
+   "id": "good",
+   "points": 20,
+   "tr": "İyi",
+   "en": "Good",
+   "desc_tr": "Temiz ve giyime hazır; hafif kullanım izi olabilir, formu iyi.",
+   "desc_en": "Clean and ready to wear; may show light wear, keeps its shape."
+  },
+  {
+   "id": "acceptable",
+   "points": 10,
+   "tr": "Kabul edilebilir",
+   "en": "Acceptable",
+   "desc_tr": "Temiz ve kullanılabilir; hafif solma veya tüylenme bulunabilir.",
+   "desc_en": "Clean and usable; may have light fading or pilling."
+  }
+ ],
+ "sizes": [
+  "XS",
+  "S",
+  "M",
+  "L",
+  "XL",
+  "XXL",
+  "other"
+ ],
+ "colors": [
+  {
+   "id": "black",
+   "tr": "Siyah",
+   "en": "Black"
+  },
+  {
+   "id": "white",
+   "tr": "Beyaz",
+   "en": "White"
+  },
+  {
+   "id": "grey",
+   "tr": "Gri",
+   "en": "Grey"
+  },
+  {
+   "id": "navy",
+   "tr": "Lacivert",
+   "en": "Navy"
+  },
+  {
+   "id": "blue",
+   "tr": "Mavi",
+   "en": "Blue"
+  },
+  {
+   "id": "green",
+   "tr": "Yeşil",
+   "en": "Green"
+  },
+  {
+   "id": "red",
+   "tr": "Kırmızı",
+   "en": "Red"
+  },
+  {
+   "id": "pink",
+   "tr": "Pembe",
+   "en": "Pink"
+  },
+  {
+   "id": "yellow",
+   "tr": "Sarı",
+   "en": "Yellow"
+  },
+  {
+   "id": "orange",
+   "tr": "Turuncu",
+   "en": "Orange"
+  },
+  {
+   "id": "purple",
+   "tr": "Mor",
+   "en": "Purple"
+  },
+  {
+   "id": "brown",
+   "tr": "Kahverengi",
+   "en": "Brown"
+  },
+  {
+   "id": "beige",
+   "tr": "Bej",
+   "en": "Beige"
+  },
+  {
+   "id": "multi",
+   "tr": "Çok renkli",
+   "en": "Multicolour"
+  }
+ ]
+}

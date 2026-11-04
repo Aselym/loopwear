@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LoopWear canlı</title>
+<link rel="icon" href="/assets/icon-192.png">
+<link rel="stylesheet" href="/style.css">
+<style>
+  body{background:var(--navy-dark);color:#fff}
+  .wall{min-height:100dvh;display:grid;grid-template-columns:1.3fr 1fr;gap:4vw;padding:5vw;align-items:center}
+  .wall h1{color:#fff;font-size:clamp(34px,5.4vw,84px);font-weight:800;line-height:1}
+  .nums{display:grid;grid-template-columns:1fr 1fr;gap:2.4vw;margin-top:4vw}
+  .nums b{display:block;font-size:clamp(38px,5.6vw,92px);line-height:1;font-weight:900;color:#BFD8C6}
+  .nums span{font-size:clamp(14px,1.5vw,22px)}
+  .scan{background:#fff;border-radius:24px;padding:2.6vw;display:flex;flex-direction:column;align-items:center;gap:1.4vw;color:var(--text);text-align:center}
+  .scan svg{width:100%;max-width:34vw;display:block}
+  .scan b{font-size:clamp(20px,2.4vw,38px);font-weight:900}
+  .fine{margin-top:2.4vw;font-size:clamp(12px,1.1vw,16px);opacity:.75}
+  @media(max-width:760px){.wall{grid-template-columns:1fr}.scan svg{max-width:70vw}}
+</style>
+</head>
+<body>
+<div class="wall">
+  <div>
+    <div class="logo-wordmark" style="color:#fff;font-size:clamp(22px,2.4vw,38px)">L<span class="lp" style="color:#BFD8C6">oo</span>pWear</div>
+    <h1 style="margin-top:2vw">Bırak. Puan kazan. Döngüden edin.</h1>
+    <div class="nums">
+      <div><b id="items">0</b><span>döngüye giren ürün</span></div>
+      <div><b id="completed">0</b><span>yeni kullanıcısına ulaşan</span></div>
+      <div><b id="co2">0</b><span>kg CO₂e referans etki</span></div>
+      <div><b id="water">0</b><span>litre su referans etki</span></div>
+    </div>
+    <p class="fine">Referans etki, benzer yeni ürünlere ilişkin yaklaşık bir değerdir; ölçülmüş tasarruf değildir.</p>
+  </div>
+  <div class="scan"><div id="qr"></div><b>QR’ı okut, uygulamayı aç</b></div>
+</div>
+<script src="/vendor/qrcode.js"></script>
+<script>
+const q = qrcode(0, 'M'); q.addData(`${location.origin}/indir`); q.make();
+document.getElementById('qr').innerHTML = q.createSvgTag({ scalable: true, margin: 1 });
+const f = (n, d = 0) => Number(n).toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
+async function load() {
+  try {
+    const s = await (await fetch('/api/public/stats')).json();
+    document.getElementById('items').textContent = f(s.items);
+    document.getElementById('completed').textContent = f(s.completed);
+    document.getElementById('co2').textContent = f(s.co2, 1);
+    document.getElementById('water').textContent = f(s.water);
+  } catch { /* bir sonraki turda yeniden dener */ }
+}
+load(); setInterval(load, 8000);
+</script>
+</body>
+</html>
