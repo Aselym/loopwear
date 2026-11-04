@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.loopwear.twa",
+        "sha256_cert_fingerprints": ["CC:85:E4:F3:77:BC:49:05:2E:97:19:34:82:7E:59:C3:B7:18:0F:73:B0:2E:2D:90:BF:0C:72:B1:04:DF:5C:18"]
+      }
+    }]
