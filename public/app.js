@@ -20,6 +20,7 @@ const nav = (active) => `<nav class="bottomnav" aria-label="LoopWear">${NAV.map(
 const langSwitch = () => `<div class="lang" role="group" aria-label="${x('language')}"><button data-lang="tr" class="${S.lang === 'tr' ? 'on' : ''}">TR</button><button data-lang="en" class="${S.lang === 'en' ? 'on' : ''}">EN</button></div>`;
 const headerIcons = () => `<div class="row"><a class="iconbtn" href="#/notifications" aria-label="${x('notifications')}">${IC.bell}${S.user?.unread ? `<span class="dot">${S.user.unread}</span>` : ''}</a><a class="iconbtn" href="#/profile" aria-label="${x('profile')}">${IC.user}</a></div>`;
 const backbar = (middle = '', right = '<span style="width:38px"></span>', backAttr = 'data-back') => `<div class="backbar"><button class="iconbtn" ${backAttr} aria-label="${x('back')}">${IC.back}</button>${middle}${right}</div>`;
+const installed = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
 const titleBar = (title) => backbar(`<span style="font-weight:900;font-size:16px">${esc(title)}</span>`);
 const errorBox = () => `<div class="card center stack"><p class="muted">${x('load_error')}</p><button class="btn line" data-retry>${x('retry')}</button></div>`;
 const skeleton = () => '<div class="skeleton"></div><div class="skeleton"></div>';
@@ -62,7 +63,7 @@ function splash() {
       <img src="${LOOPY.hero}" class="mascot" style="width:180px;margin-bottom:18px" alt="Loopy">
       ${wordmark(32)}<p class="muted" style="font-size:14px;max-width:260px;margin-top:8px">${x('tagline')}</p>
     </div>
-    <div style="padding:20px 20px calc(36px + var(--safe-b))"><a class="btn" href="#/start">${x('start')}</a></div>`);
+    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))"><a class="btn" href="#/start">${x('start')}</a>${installed ? '' : `<a class="btn line navy" href="/indir">${x('install_app')}</a>`}</div>`);
 }
 function onboarding() {
   screen(`<div class="content center-col" style="justify-content:center;padding-bottom:0">
@@ -482,7 +483,7 @@ async function profile() {
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
     <h2 class="section-title">LoopWear</h2>
-    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
+    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${installed ? '' : `${row(IC.doc, t('install_app'), '/indir')}${div}`}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
     ${u.role === 'admin' ? `<div class="card" style="border-color:var(--coral)">${row(IC.shield, t('admin_panel'), '#/admin')}</div>` : ''}
     <button class="center" style="width:100%;color:var(--coral);font-weight:800;padding:10px 0 20px" data-logout>${x('log_out')}</button></div>`);
 }

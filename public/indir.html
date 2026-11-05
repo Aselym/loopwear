@@ -30,8 +30,8 @@ if (navigator.standalone || matchMedia('(display-mode: standalone)').matches) lo
 </div></div>
 <script>
 const T = {
-  tr: { title: 'LoopWear’i telefonuna kur', android: 'Android uygulamasını indir', open: 'Tarayıcıda aç', apk: 'İndirdikten sonra dosyayı aç. Telefon izin isterse "Bu kaynaktan izin ver" seç.', ios: ['Bu sayfayı Safari’de aç.', 'Alttaki Paylaş düğmesine dokun.', '"Ana Ekrana Ekle"yi seç.'], iosOpen: 'Uygulamayı aç', other: 'Telefonunla bu adresi aç ya da hemen tarayıcıda kullan.' },
-  en: { title: 'Get LoopWear on your phone', android: 'Download the Android app', open: 'Open in browser', apk: 'Open the file after downloading. If your phone asks, choose "Allow from this source".', ios: ['Open this page in Safari.', 'Tap the Share button at the bottom.', 'Choose "Add to Home Screen".'], iosOpen: 'Open the app', other: 'Open this address on your phone, or use it in your browser now.' },
+  tr: { title: 'LoopWear’i telefonuna kur', android: 'Android uygulamasını indir', open: 'Tarayıcıda aç', apk: 'İndirdikten sonra dosyayı aç. Telefon izin isterse "Bu kaynaktan izin ver" seç.', ios: ['Bu sayfayı Safari’de aç.', 'Alttaki Paylaş düğmesine dokun.', '"Ana Ekrana Ekle"yi seç.'], iosOpen: 'Uygulamayı aç', other: 'Android için uygulamayı indir. iPhone’da bu adresi Safari’de açıp Ana Ekrana Ekle’yi seç. Hemen tarayıcıda da kullanabilirsin.' },
+  en: { title: 'Get LoopWear on your phone', android: 'Download the Android app', open: 'Open in browser', apk: 'Open the file after downloading. If your phone asks, choose "Allow from this source".', ios: ['Open this page in Safari.', 'Tap the Share button at the bottom.', 'Choose "Add to Home Screen".'], iosOpen: 'Open the app', other: 'Download the app for Android. On iPhone, open this address in Safari and choose Add to Home Screen. You can also use it in your browser now.' },
 };
 let lang = (navigator.language || '').startsWith('tr') ? 'tr' : 'en';
 const ua = navigator.userAgent;
@@ -53,7 +53,7 @@ function render(hasApk) {
     cta.innerHTML = a('/LoopWear.apk', '', t.android, 'download') + a('/', 'line navy', t.open);
   } else {
     steps.textContent = android ? '' : t.other;
-    cta.innerHTML = a('/', '', t.open);
+    cta.innerHTML = (hasApk ? a('/LoopWear.apk', '', t.android, 'download') : '') + a('/', hasApk ? 'line navy' : '', t.open);
   }
 }
 let hasApk = false;
