@@ -133,7 +133,7 @@ export function countUp(el, to, ms = 900) {
 
 // Bildirim türünün tonu: olumlu, olumsuz ya da bilgi
 const GOOD = new Set(['item_published', 'item_ready', 'drop_approved', 'pickup_ready', 'pickup_completed', 'return_approved', 'support_closed', 'item_corrected']);
-const BAD = new Set(['drop_rejected', 'drop_expired', 'pickup_rejected', 'pickup_expired', 'return_rejected']);
+const BAD = new Set(['item_removed', 'drop_rejected', 'drop_expired', 'pickup_rejected', 'pickup_expired', 'return_rejected']);
 export const notifTone = (kind) => (GOOD.has(kind) ? 'success' : BAD.has(kind) ? 'error' : 'info');
 
 // Alt panel; kapatıldığında çözülen söz döner

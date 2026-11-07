@@ -231,6 +231,7 @@
 
 /* ---------- Alt panel ---------- */
 [data-theme="v2"] .sheet { border-radius: 28px 28px 0 0; background: var(--bg); }
+@media (min-width: 900px) { [data-theme="v2"] .sheet { border-radius: 28px; } }
 [data-theme="v2"] .sheet::before { content: ""; align-self: center; width: 38px; height: 4px; border-radius: 4px; background: var(--thread); margin: -8px 0 2px; }
 [data-theme="v2"] .opt { border-radius: 14px; font-weight: 600; }
 [data-theme="v2"] .opt:hover, [data-theme="v2"] .opt.on { background: #EAF0E7; }

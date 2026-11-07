@@ -132,6 +132,14 @@ Object.assign(DICT.tr, {
   a_blog: 'İklim gündemi', a_blog_new: 'Yeni yazı ya da haber', a_blog_title: 'Başlık', a_blog_date: 'Tarih', a_blog_source: 'Kaynak', a_blog_url: 'Haber bağlantısı', a_blog_summary: 'Kısa özet', a_blog_body: 'Yazı metni', a_blog_body_hint: 'Kendi yazınız için metni buraya yazın. Haber paylaşıyorsanız bağlantı ve özet yeterli.', a_blog_image: 'Fotoğraf', a_blog_publish: 'Yayınla', a_blog_list: 'Yayındaki yazılar ({n})', a_blog_delete: 'Kaldır', a_blog_delete_q: 'Bu yazı İklim gündemi’nden kalkar.',
   e_title_required: 'Başlık yaz.', e_invalid_url: 'Bağlantı https:// ile başlamalı.', e_body_or_url: 'Bir haber bağlantısı ya da yazı metni ekle.',
 });
+Object.assign(DICT.tr, {
+  a_listings: 'Keşfet ilanları', a_listings_body: 'Onaylanmış ve şu an Keşfet’te alınabilir duran ilanlar. Kaldırılan ilan Keşfet’ten çıkar, sahibine gerekçeyle bildirim gider.', a_listed_at: 'Yayına girdi', a_remove_listing: 'Keşfet’ten kaldır',
+  a_preset_gone: 'Ürün artık istasyonda yok', a_preset_notfound: 'Ürün bulunamadı', n_item_removed: '{cat} ilanın Keşfet’ten kaldırıldı. Gerekçe: {reason}',
+});
+Object.assign(DICT.en, {
+  a_listings: 'Discover listings', a_listings_body: 'Approved items currently available on Discover. A removed listing leaves Discover and the owner is notified with the reason.', a_listed_at: 'Listed', a_remove_listing: 'Remove from Discover',
+  a_preset_gone: 'Item is no longer at the station', a_preset_notfound: 'Item could not be found', n_item_removed: 'Your {cat} listing was removed from Discover. Reason: {reason}',
+});
 Object.assign(DICT.en, {
   blog_title: 'Climate news', blog_sub: 'Latest news and stories on the climate crisis, fashion and circular living.', blog_all: 'All posts', blog_read: 'Read the story', blog_more: 'Read more', blog_empty: 'No posts yet.', go_discover: 'Go to Discover',
   a_blog: 'Climate news', a_blog_new: 'New post or news link', a_blog_title: 'Title', a_blog_date: 'Date', a_blog_source: 'Source', a_blog_url: 'News link', a_blog_summary: 'Short summary', a_blog_body: 'Post text', a_blog_body_hint: 'Write your own post here. For news, a link and summary are enough.', a_blog_image: 'Photo', a_blog_publish: 'Publish', a_blog_list: 'Published posts ({n})', a_blog_delete: 'Remove', a_blog_delete_q: 'This post will be removed from Climate news.',

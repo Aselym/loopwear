@@ -385,3 +385,18 @@ test('iklim gündemi: seçilmiş haberler hazır; yönetici ekler ve kaldırır,
   await seed(db, { adminEmail: 'admin@example.com', adminPassword: 'adminparola1' });
   assert.equal((await pub.get('/api/blog')).data.posts.length, 11);
 });
+
+test('yönetici Keşfet’teki onaylı ilanı gerekçeyle kaldırır, sahibine bildirim gider', async () => {
+  const u = await member();
+  const item = await ready(u);
+  const list = (await admin.get('/api/admin/listings')).data.items;
+  assert.ok(list.some((i) => i.id === item.id && i.owner.email));
+  assert.equal((await u.get('/api/admin/listings')).status, 403);
+  assert.equal((await admin.post(`/api/admin/items/${item.id}/remove`, {})).data.error, 'reason_required');
+  assert.equal((await admin.post(`/api/admin/items/${item.id}/remove`, { reason: 'Ürün artık istasyonda yok' })).status, 200);
+  assert.ok(!(await new Client().get('/api/items')).data.items.some((i) => i.id === item.id));
+  assert.ok(!(await admin.get('/api/admin/listings')).data.items.some((i) => i.id === item.id));
+  const notes = (await u.get('/api/me/notifications')).data.notifications;
+  assert.ok(notes.some((n) => n.kind === 'item_removed' && n.params.reason === 'Ürün artık istasyonda yok'));
+  assert.equal((await admin.post(`/api/admin/items/${item.id}/remove`, { reason: 'tekrar' })).status, 409);
+});

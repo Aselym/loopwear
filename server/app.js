@@ -357,6 +357,12 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     return { pending_support: pendingSupport, pending_drops: by.PENDING_DROP || 0, pending_pickups: by.PENDING_PICKUP || 0, pending_returns: pr, ready: by.READY || 0, completed: by.COMPLETED || 0, points_moved: moved, users, impact: imp };
   });
 
+  // Keşfet'te yayında olan (onaylanmış, kimse almamış) ilanlar
+  route('GET', '/api/admin/listings', admin, async ({ user }) => {
+    const items = await queue('READY', user.id, 'ready_at DESC');
+    const rows = await db.q("SELECT i.id, u.display_name, u.email FROM items i JOIN users u ON u.id=i.owner_id WHERE i.status='READY'");
+    return { items: items.map((it) => ({ ...it, owner: rows.find((r) => r.id === it.id) })) };
+  });
   route('GET', '/api/admin/drops', admin, async ({ user }) => {
     const s = await L.getSettings(db);
     const items = await queue('PENDING_DROP', user.id);

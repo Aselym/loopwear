@@ -181,7 +181,8 @@ export async function removeItem(db, adminId, itemId, { reason } = {}) {
     const [item] = await t.q("UPDATE items SET status='REJECTED', status_reason=$2 WHERE id=$1 AND status='READY' RETURNING *", [itemId, why]);
     if (!item) throw new AppError('invalid_state', 409);
     await audit(t, adminId, 'item', itemId, 'remove', 'READY', 'REJECTED', why);
-    await notify(t, item.owner_id, 'drop_rejected', { ...notifyParams(item), reason: why });
+    await t.q('UPDATE subscriptions SET active=FALSE WHERE item_id=$1', [itemId]);
+    await notify(t, item.owner_id, 'item_removed', { ...notifyParams(item), reason: why });
   });
 }
 

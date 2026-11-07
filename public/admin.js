@@ -2,7 +2,7 @@
 import { S, t, esc, api, post, errText, catName, matName, condName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, sheet, confirmSheet, pickSheet, compressPhoto, name } from './core.js';
 
 const x = (k, p) => esc(t(k, p));
-const TABS = ['summary', 'scan', 'drops', 'pickups', 'returns', 'support', 'blog', 'intake', 'users', 'impact', 'settings', 'audit'];
+const TABS = ['summary', 'scan', 'drops', 'listings', 'pickups', 'returns', 'support', 'blog', 'intake', 'users', 'impact', 'settings', 'audit'];
 let root; let counts = {};
 
 const emptyBox = () => `<div class="card center muted">${x('a_empty')}</div>`;
@@ -80,6 +80,15 @@ async function drops() {
   const { items } = await api('/api/admin/drops');
   set(`<h1 style="margin-bottom:14px">${x('a_drops')}</h1>${items.length ? `<div class="queue">${items.map(dropCard).join('')}</div>` : emptyBox()}`);
 }
+// ---------- Keşfet ilanları ----------
+async function listings() {
+  const { items } = await api('/api/admin/listings');
+  set(`<h1 style="margin-bottom:6px">${x('a_listings')}</h1><p class="small muted" style="margin-bottom:14px">${x('a_listings_body')}</p>
+    ${items.length ? `<div class="queue">${items.map((it) => `<div class="card stack">${thumbs(it)}<div>${itemLine(it)}</div>
+      <div class="small muted">${x('a_owner')}: ${esc(it.owner?.display_name)} (${esc(it.owner?.email)})<br>${x('d_station')}: ${esc(stationName(it.station_id))}<br>${x('a_listed_at')}: ${esc(when(it.ready_at || it.created_at))}</div>
+      <button class="btn small danger" data-remove-item="${esc(it.id)}">${x('a_remove_listing')}</button></div>`).join('')}</div>` : emptyBox()}`);
+}
+
 const condSelect = (cur) => `<div class="field"><label for="cs">${x('a_correct_condition')}</label><select class="input" id="cs" data-extra="condition">${S.catalog.conditions.map((c) => `<option value="${c.id}" ${c.id === cur ? 'selected' : ''}>${esc(name(c))}</option>`).join('')}</select></div>`;
 async function approveDropFlow(id, cond) {
   const r = await reasonSheet(t('a_approve'), [t('a_preset_ok')], { extra: condSelect(cond) });
@@ -297,7 +306,7 @@ async function audit() {
     ${entries.map((e) => `<tr><td style="white-space:nowrap">${when(e.created_at)}</td><td>${esc(e.actor || t('a_system'))}</td><td>${esc(e.entity_type)}: ${esc(e.action)}</td><td>${esc(e.old_value ?? '')}${e.new_value != null ? ` / ${esc(e.new_value)}` : ''}</td><td>${esc(e.reason ?? '')}</td></tr>`).join('')}</tbody></table></div>`);
 }
 
-const VIEWS = { support, blog, summary, drops, pickups, returns, users, impact, settings, audit };
+const VIEWS = { support, blog, listings, summary, drops, pickups, returns, users, impact, settings, audit };
 
 export async function renderAdmin(app, a, b) {
   root = app;
@@ -320,6 +329,7 @@ document.addEventListener('click', async (e) => {
   const q = (s) => e.target.closest(s); let el;
   if ((el = q('[data-approve-drop]'))) await approveDropFlow(el.dataset.approveDrop, el.dataset.cond);
   else if ((el = q('[data-reject-drop]'))) await rejectDropFlow(el.dataset.rejectDrop);
+  else if ((el = q('[data-remove-item]'))) { const r = await reasonSheet(t('a_remove_listing'), [t('a_preset_gone'), t('a_preset_policy'), t('a_preset_notfound')], { okLabel: t('a_remove_listing'), danger: true }); if (r) await act(() => post(`/api/admin/items/${el.dataset.removeItem}/remove`, r)); }
   else if ((el = q('[data-blog-del]'))) { if (await confirmSheet(t('a_blog_delete'), t('a_blog_delete_q'), t('a_blog_delete'), { danger: true })) await act(() => post(`/api/admin/blog/${el.dataset.blogDel}/delete`)); }
   else if ((el = q('[data-support-done]'))) { const r = await reasonSheet(t('a_support_done'), [t('a_preset_replied')], { okLabel: t('a_support_done') }); if (r) await act(() => post(`/api/admin/support/${el.dataset.supportDone}/close`, r)); }
   else if ((el = q('[data-approve-pick]'))) { const r = await reasonSheet(t('a_approve_qr'), [t('a_preset_pick')], { okLabel: t('a_approve_qr') }); if (r) await act(() => post(`/api/admin/reservations/${el.dataset.approvePick}/approve`, r)); }
