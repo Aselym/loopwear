@@ -148,6 +148,7 @@ textarea.input{min-height:80px;resize:vertical;font-weight:500}
 .kpi-sep{width:1px;background:var(--line);margin:4px 0}
 .card.metric{text-align:center;border:none;margin:0}
 .metric .v{font-size:22px;font-weight:900;margin-top:6px}
+.metric .eq{margin-top:8px;font-size:12px;font-weight:800;line-height:1.35;color:var(--text);background:rgba(255,255,255,.65);border-radius:10px;padding:6px 8px}
 .metric .none{font-size:13.5px;font-weight:800;color:var(--text2);margin-top:8px}
 .footnote{font-size:11px;color:var(--text2);line-height:1.5;background:#F3EEE3;padding:10px 12px;border-radius:12px;margin-top:8px}
 .fin{display:flex;justify-content:space-between;align-items:center;padding:5px 0;gap:10px}

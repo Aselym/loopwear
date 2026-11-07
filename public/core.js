@@ -193,14 +193,28 @@ export function compressPhoto(file) {
   });
 }
 
+// Varsayımlar: binek araç km başına 0,17 kg CO₂e; bir kişi günde 2 litre içme suyu
+const CAR_KG_PER_KM = 0.17;
+const DRINK_L_PER_DAY = 2;
+const roundNice = (n) => (n < 100 ? Math.round(n) : n < 1000 ? Math.round(n / 10) * 10 : Math.round(n / 100) * 100);
+export function co2Equivalent(kg) {
+  return t('eq_car', { km: fmt(Math.max(1, roundNice(kg / CAR_KG_PER_KM))) });
+}
+export function waterEquivalent(litres) {
+  const days = litres / DRINK_L_PER_DAY;
+  if (days < 2) return t('eq_bottles', { n: fmt(Math.max(1, Math.round(litres / 0.5))) });
+  if (days < 730) return t('eq_water_days', { n: fmt(roundNice(days)) });
+  return t('eq_water_years', { n: fmt(days / 365, 1) });
+}
 export function impactMetrics(impact) {
-  const m = (bg, ic, v, unit) => `<div class="card solid metric" style="background:${bg}">${ic}${v == null ? `<div class="none">${esc(t('data_soon'))}</div>` : `<div class="v">${v}</div>`}<div class="muted">${unit}</div></div>`;
-  return `<div class="grid2">${m('#EEF2EC', IC.cloud, impact?.co2 == null ? null : `${fmt(impact.co2, 1)} kg`, 'CO₂e')}${m('#ECF0F3', IC.drop, impact?.water == null ? null : `${fmt(impact.water)} L`, esc(t('water')))}</div>`;
+  const m = (bg, ic, v, unit, eq) => `<div class="card solid metric" style="background:${bg}">${ic}${v == null ? `<div class="none">${esc(t('data_soon'))}</div>` : `<div class="v">${v}</div>`}<div class="muted">${unit}</div>${eq ? `<div class="eq">${esc(eq)}</div>` : ''}</div>`;
+  const co2 = impact?.co2; const water = impact?.water;
+  return `<div class="grid2">${m('#EEF2EC', IC.cloud, co2 == null ? null : `${fmt(co2, 1)} kg`, 'CO₂e', co2 == null ? '' : `🚗 ${co2Equivalent(co2)}`)}${m('#ECF0F3', IC.drop, water == null ? null : `${fmt(water)} L`, esc(t('water')), water == null ? '' : `💧 ${waterEquivalent(water)}`)}</div>`;
 }
 
 export function methodSheet() {
   return sheet(`<h2>${esc(t('method_title'))}</h2>
-    <p>${esc(t('method_1'))}</p><p>${esc(t('method_2'))}</p><p>${esc(t('method_3'))}</p><p class="small muted">${esc(t('method_4'))}</p>
+    <p>${esc(t('method_1'))}</p><p>${esc(t('method_2'))}</p><p>${esc(t('method_3'))}</p><p class="small muted">${esc(t('method_4'))}</p><p class="small muted">${esc(t('method_eq'))}</p>
     <details><summary class="link" style="cursor:pointer">${esc(t('sources'))}</summary>
       <p class="small" style="margin-top:8px"><a href="https://www.calpsc.org/_files/ugd/ad724e_df7e1839e74d4c00949f03f25f24f24e.pdf" target="_blank" rel="noopener">${esc(t('src_1'))}</a></p>
       <p class="small" style="margin-top:8px"><a href="https://www.mdpi.com/2071-1050/17/10/4411" target="_blank" rel="noopener">${esc(t('src_2'))}</a></p>

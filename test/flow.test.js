@@ -354,3 +354,12 @@ test('arama Türkçe karakter ve büyük harfe duyarsızdır', async () => {
   assert.ok(await found('gömlek m'));
   assert.ok(!(await found('kaban')));
 });
+
+test('Boğaziçi istasyonları COP31 ile birlikte açık; panelden kapatılan yeniden açılmaz', async () => {
+  const active = async () => (await new Client().get('/api/catalog')).data.stations.filter((s) => s.active).map((s) => s.id).sort();
+  assert.deepEqual(await active(), ['north', 'south', 'stand']);
+  assert.equal((await admin.post('/api/admin/stations/north', { active: false, reason: 'test' })).status, 200);
+  await seed(db, { adminEmail: 'admin@example.com', adminPassword: 'adminparola1' });
+  assert.deepEqual(await active(), ['south', 'stand']);
+  await admin.post('/api/admin/stations/north', { active: true, reason: 'test' });
+});

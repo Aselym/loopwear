@@ -115,6 +115,16 @@ Object.assign(DICT.tr, {
   result_note: 'Puanın hesabına eklendi. Ürünün onaylandıktan sonra Keşfet’te görünecek.', n_item_published: '{cat} kaydedildi, {points} LoopPuan hesabına eklendi. Onaylanınca Keşfet’te görünecek.',
   pending_note: 'Ürünün onay bekliyor. Onaylanınca Keşfet’te görünecek.',
 });
+Object.assign(DICT.tr, {
+  ph_optional: 'Kıyafet etiketi', photos_body: 'Kıyafetin önünü, arkasını, bir detayını ve etiketini çek. Fotoğraflar ürün sayfasında diğer üyelere gösterilir, kişisel bilgi içermemesine dikkat et.',
+  eq_car: '≈ {km} km araba yolculuğu', eq_water_days: '≈ bir kişinin {n} günlük içme suyu', eq_water_years: '≈ bir kişinin {n} yıllık içme suyu', eq_bottles: '≈ {n} şişe su',
+  method_eq: 'Karşılaştırmalar yaklaşıktır: bir binek aracın kilometre başına ortalama 0,17 kg CO₂e saldığı ve bir kişinin günde 2 litre su içtiği varsayılır.',
+});
+Object.assign(DICT.en, {
+  ph_optional: 'Care label', photos_body: 'Photograph the front, back, a detail and the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
+  eq_car: '≈ {km} km by car', eq_water_days: '≈ {n} days of drinking water for one person', eq_water_years: '≈ {n} years of drinking water for one person', eq_bottles: '≈ {n} bottles of water',
+  method_eq: 'Comparisons are approximate: an average car is assumed to emit 0.17 kg CO₂e per km, and one person is assumed to drink 2 litres of water a day.',
+});
 Object.assign(DICT.en, {
   analyzing: 'LoopAI is calculating your points', an_1: 'Reading your photos and details', an_2: 'Matching category and condition', an_3: 'Calculating your reference impact', an_4: 'Calculating the points you earn',
   earned: 'Points you earned', ph_optional: 'Care label (optional)', photos_body: 'Front, back and detail photos are required. You can also add the care label. Photos appear on the item page for other members, so make sure they show no personal information.',

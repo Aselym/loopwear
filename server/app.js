@@ -28,9 +28,14 @@ const hashToken = (t) => createHash('sha256').update(t).digest('hex');
 export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPassword = process.env.ADMIN_PASSWORD } = {}) {
   await db.q(`INSERT INTO stations (id, name_tr, name_en, campus_label, active, sort_order) VALUES
     ('stand','COP31 LoopStation','COP31 LoopStation','Antalya',TRUE,0),
-    ('north','Kuzey LoopStation','North LoopStation','Boğaziçi',FALSE,1),
-    ('south','Güney LoopStation','South LoopStation','Boğaziçi',FALSE,2)
+    ('north','Kuzey LoopStation','North LoopStation','Boğaziçi Üniversitesi',TRUE,1),
+    ('south','Güney LoopStation','South LoopStation','Boğaziçi Üniversitesi',TRUE,2)
     ON CONFLICT (id) DO NOTHING`);
+  const [opened] = await db.q("SELECT 1 FROM settings WHERE key='stations_bogazici'");
+  if (!opened) {
+    await db.q("UPDATE stations SET active=TRUE, campus_label='Boğaziçi Üniversitesi' WHERE id IN ('north','south')");
+    await db.q("INSERT INTO settings (key, value) VALUES ('stations_bogazici','1') ON CONFLICT (key) DO NOTHING");
+  }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
   if (!g) await db.q("INSERT INTO gifts (id, name_tr, name_en, points, stock) VALUES ($1,'LoopWear anahtarlık','LoopWear keychain',20,0)", [newId()]);
