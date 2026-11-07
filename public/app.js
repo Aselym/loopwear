@@ -100,7 +100,7 @@ const pointsCard = (u) => `<a class="card solid flat row between" href="#/wallet
 async function home() {
   const u = S.user;
   screen(`<div class="content">
-    <div class="row between" style="margin-bottom:18px"><div><div style="font-size:19px;font-weight:900">${x('hello', { name: u.display_name })} 👋</div><p class="muted" style="margin-top:2px">${x('home_sub')}</p></div>${headerIcons()}</div>
+    <div class="row between" style="margin-bottom:18px"><div><div style="font-size:19px;font-weight:900">${x('hello', { name: u.display_name })}</div></div>${headerIcons()}</div>
     ${pointsCard(u)}
     <div class="card solid flat" style="background:#EDF1EA;margin-top:2px"><div class="row between" style="align-items:flex-start"><div style="max-width:210px"><div style="font-weight:900;font-size:16px;line-height:1.3;margin-bottom:10px">${x('home_cta_title')}</div><a class="btn small" href="#/drop" style="padding:11px 18px;display:inline-flex">${x('drop_cta')}</a></div><img src="${LOOPY.face}" class="mascot" style="width:64px;margin-top:-6px" alt=""></div></div>
     <div class="row between" style="margin:18px 0 10px"><h2 class="section-title" style="margin:0">${x('nav_discover')}</h2><a class="link" href="#/discover">${x('see_all')}</a></div>

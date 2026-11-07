@@ -113,13 +113,16 @@
 [data-theme="v2"] .btn.green:hover { background: #355E42; }
 [data-theme="v2"] .btn.line { background: transparent; border-width: 1.5px; }
 [data-theme="v2"] .btn.line.navy { border-color: var(--navy); color: var(--navy); }
-[data-theme="v2"] .btn.danger { color: var(--coral); border-color: var(--coral); }
+[data-theme="v2"] .btn.danger { background: transparent; color: var(--coral); border: 1.5px solid var(--coral); }
+[data-theme="v2"] .btn.danger:hover { background: #F6E1DD; }
 [data-theme="v2"] .btn.small { min-height: 0; border-radius: 999px; }
 [data-theme="v2"] .link { color: var(--denim); font-family: var(--display); font-weight: 700; font-size: 14px; }
 
 /* ---------- Durum etiketleri: yün tonları ---------- */
 [data-theme="v2"] .pill { font-weight: 700; font-size: 11.5px; padding: 5px 9px; border-radius: 8px; max-width: 100%; }
 [data-theme="v2"] .pill span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+[data-theme="v2"] .pcard .pill { font-size: 10.5px; padding: 4px 7px; gap: 3px; letter-spacing: -.01em; }
+[data-theme="v2"] .pcard .pill svg { width: 10px; height: 10px; }
 [data-theme="v2"] .p-ready { background: #DFEADF; color: #2F5A3C; }
 [data-theme="v2"] .p-info { background: #DFE7F1; color: var(--denim); }
 [data-theme="v2"] .p-mid { background: #F1E5CF; color: #7A5B2C; }

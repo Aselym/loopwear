@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="tr">
+<html lang="tr" data-theme="v2">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>LoopWear</title>
 <meta name="description" content="Kıyafetini bırak, LoopPuan kazan, döngüden edin.">
-<meta name="theme-color" content="#FCF8ED">
+<meta name="theme-color" content="#F6F0E3">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/assets/icon-192.png">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
@@ -14,13 +14,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="LoopWear">
 <link rel="stylesheet" href="/style.css">
-<script>
-// /deneme adresi: aynı uygulama, yeni arayüz denemesi
-if (/^\/deneme\/?$/.test(location.pathname)) {
-  document.documentElement.dataset.theme = 'v2';
-  document.write('<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap"><link rel="stylesheet" href="/theme-v2.css">');
-}
-</script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gabarito:wght@500;600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/theme-v2.css">
 </head>
 <body>
 <div id="app"></div>
