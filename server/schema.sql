@@ -76,6 +76,10 @@ CREATE TABLE IF NOT EXISTS support_requests (
   status TEXT NOT NULL DEFAULT 'OPEN', created_at TIMESTAMPTZ NOT NULL DEFAULT now(), closed_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS support_status ON support_requests(status, created_at);
+CREATE TABLE IF NOT EXISTS blog_posts (
+  id TEXT PRIMARY KEY, lang TEXT NOT NULL, title TEXT NOT NULL, source TEXT, url TEXT, summary_tr TEXT, summary_en TEXT, body TEXT,
+  image BYTEA, image_mime TEXT, published_on DATE, created_by TEXT, created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS gifts (
   id TEXT PRIMARY KEY, name_tr TEXT NOT NULL, name_en TEXT NOT NULL, points INT NOT NULL, stock INT NOT NULL,
   active BOOLEAN NOT NULL DEFAULT TRUE, created_at TIMESTAMPTZ NOT NULL DEFAULT now()

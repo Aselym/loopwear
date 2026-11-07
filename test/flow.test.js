@@ -33,7 +33,7 @@ async function member() {
   return c;
 }
 const balance = async (c) => (await c.get('/api/me')).data.user.wallet_balance;
-const itemBody = (o = {}) => ({ category: 'denim_jacket', material: 'cotton', size: 'M', condition: 'very_good', color: 'blue', station_id: 'stand', consents: [true, true, true, true], photos: [PX, PX, PX], ...o });
+const itemBody = (o = {}) => ({ category: 'jacket', material: 'cotton', size: 'M', condition: 'very_good', color: 'blue', station_id: 'north', consents: [true, true, true, true], photos: [PX, PX, PX], ...o });
 let admin;
 
 before(async () => {
@@ -59,16 +59,15 @@ test('puan formülü belgelerdeki örnekleri üretir', () => {
   assert.equal(computePoints('tshirt', 'acceptable'), 35);
 });
 
-test('etki: pamuklu tişört 13,6 kg ve 2400 L; kapalı ve bilinmeyen eşleşmede değer yok', () => {
+test('etki: ekip veri setinden ürün başına değer; bilinmeyen ve eski seçenekte değer yok', () => {
   const t = computeImpact('tshirt', 'cotton');
-  assert.equal(t.co2e_reference.toFixed(1), '13.6');
-  assert.equal(Math.round(t.water_reference), 2400);
+  assert.equal(t.co2e_reference, 8.26);
+  assert.equal(t.water_reference, 1454);
   assert.equal(computeImpact('tshirt', 'unknown').co2e_reference, null);
   assert.equal(computeImpact('tshirt', 'blend').water_reference, null);
-  assert.equal(computeImpact('tshirt', 'elastane').co2e_reference, null);
-  assert.equal(computeImpact('denim_jacket', 'leather').co2e_reference, null);
   assert.equal(computeImpact('leather_jacket', 'cotton').co2e_reference, null);
-  assert.ok(computeImpact('leather_jacket', 'leather').co2e_reference > 0);
+  assert.equal(computeImpact('mont', 'wool').co2e_reference, 105.66);
+  assert.equal(computeImpact('blazer', 'polyester_elastane').water_reference, 798);
 });
 
 test('K1: 4 onay ve en az 3 görsel olmadan kayıt olmaz', async () => {
@@ -285,13 +284,13 @@ test('K10: Etkim yöntem sürümünü saklar; eksik değer sıfır sayılmaz; re
   const u = await member();
   const a = await u.post('/api/items', itemBody({ category: 'tshirt', material: 'cotton', condition: 'acceptable' }));
   assert.equal(a.data.item.point_value, 35);
-  assert.equal(a.data.item.impact.version, 'v2');
+  assert.equal(a.data.item.impact.version, 'v3');
   await u.post('/api/items', itemBody({ category: 'shirt', material: 'unknown', condition: 'good' }));
   let imp = (await u.get('/api/me/impact')).data;
   assert.equal(imp.total, 2);
   assert.equal(imp.co2.count, 1);
-  assert.equal(imp.co2.sum.toFixed(1), '13.6');
-  assert.equal(Math.round(imp.water.sum), 2400);
+  assert.equal(imp.co2.sum.toFixed(2), '8.26');
+  assert.equal(Math.round(imp.water.sum), 1454);
   await u.post(`/api/items/${a.data.item.id}/cancel`);
   imp = (await u.get('/api/me/impact')).data;
   assert.equal(imp.total, 1);
@@ -357,9 +356,32 @@ test('arama Türkçe karakter ve büyük harfe duyarsızdır', async () => {
 
 test('Boğaziçi istasyonları COP31 ile birlikte açık; panelden kapatılan yeniden açılmaz', async () => {
   const active = async () => (await new Client().get('/api/catalog')).data.stations.filter((s) => s.active).map((s) => s.id).sort();
-  assert.deepEqual(await active(), ['north', 'south', 'stand']);
+  assert.deepEqual(await active(), ['north', 'south']);
   assert.equal((await admin.post('/api/admin/stations/north', { active: false, reason: 'test' })).status, 200);
   await seed(db, { adminEmail: 'admin@example.com', adminPassword: 'adminparola1' });
-  assert.deepEqual(await active(), ['south', 'stand']);
+  assert.deepEqual(await active(), ['south']);
   await admin.post('/api/admin/stations/north', { active: true, reason: 'test' });
+});
+
+test('iklim gündemi: seçilmiş haberler hazır; yönetici ekler ve kaldırır, üye ekleyemez', async () => {
+  const pub = new Client();
+  const list = (await pub.get('/api/blog')).data.posts;
+  assert.equal(list.length, 11);
+  assert.ok(list.every((p) => p.url.startsWith('https://') && p.summary_tr && p.summary_en));
+  assert.ok(list[0].published_on >= list[list.length - 1].published_on);
+  const u = await member();
+  assert.equal((await u.post('/api/admin/blog', { title: 'x', url: 'https://example.com' })).status, 403);
+  assert.equal((await admin.post('/api/admin/blog', { title: '', url: 'https://example.com' })).data.error, 'title_required');
+  assert.equal((await admin.post('/api/admin/blog', { title: 'x', url: 'javascript:alert(1)' })).data.error, 'invalid_url');
+  assert.equal((await admin.post('/api/admin/blog', { title: 'x' })).data.error, 'body_or_url');
+  const own = await admin.post('/api/admin/blog', { title: 'Kampüste LoopWear standı', body: 'Bugün kampüsteydik.', image: PX, published_on: '2026-11-08' });
+  assert.equal(own.status, 200);
+  const one = (await pub.get(`/api/blog/${own.data.id}`)).data.post;
+  assert.equal(one.body, 'Bugün kampüsteydik.');
+  assert.equal((await pub.call('GET', one.image)).status, 200);
+  assert.equal((await pub.get('/api/blog')).data.posts[0].id, own.data.id);
+  assert.equal((await admin.post(`/api/admin/blog/${own.data.id}/delete`)).status, 200);
+  assert.equal((await pub.get(`/api/blog/${own.data.id}`)).status, 404);
+  await seed(db, { adminEmail: 'admin@example.com', adminPassword: 'adminparola1' });
+  assert.equal((await pub.get('/api/blog')).data.posts.length, 11);
 });

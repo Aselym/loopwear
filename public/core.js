@@ -193,8 +193,8 @@ export function compressPhoto(file) {
   });
 }
 
-// Varsayımlar: binek araç km başına 0,17 kg CO₂e; bir kişi günde 2 litre içme suyu
-const CAR_KG_PER_KM = 0.17;
+// Varsayımlar: EPA tipik binek araç 0,244 kg CO₂e/km (1 kg ≈ 4,1 km); bir kişi yılda 730 L (günde 2 L) içme suyu
+const CAR_KG_PER_KM = 0.244;
 const DRINK_L_PER_DAY = 2;
 const roundNice = (n) => (n < 100 ? Math.round(n) : n < 1000 ? Math.round(n / 10) * 10 : Math.round(n / 100) * 100);
 export function co2Equivalent(kg) {
@@ -212,12 +212,26 @@ export function impactMetrics(impact) {
   return `<div class="grid2">${m('#EEF2EC', IC.cloud, co2 == null ? null : `${fmt(co2, 1)} kg`, 'CO₂e', co2 == null ? '' : `🚗 ${co2Equivalent(co2)}`)}${m('#ECF0F3', IC.drop, water == null ? null : `${fmt(water)} L`, esc(t('water')), water == null ? '' : `💧 ${waterEquivalent(water)}`)}</div>`;
 }
 
+export const postSummary = (p) => (S.lang === 'en' ? p.summary_en || p.summary_tr : p.summary_tr || p.summary_en) || '';
+const ACCENTS = ['#3F7254', '#D47F7F', '#3F5F86', '#E0A43A'];
+// Haber kartı: dış bağlantı yeni sekmede, kendi yazımız uygulama içinde açılır
+export function postCard(p, i = 0) {
+  const external = p.url && !p.body;
+  const href = external ? p.url : `#/blog/${p.id}`;
+  const date = p.published_on ? new Date(`${p.published_on}T12:00:00`).toLocaleDateString(S.lang === 'en' ? 'en-GB' : 'tr-TR', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  return `<a class="post" href="${esc(href)}" ${external ? 'target="_blank" rel="noopener"' : ''} style="--accent:${ACCENTS[i % ACCENTS.length]}">
+    ${p.image ? `<img class="post-img" src="${esc(p.image)}" alt="" loading="lazy">` : '<div class="post-band"><span>🌍</span></div>'}
+    <div class="post-body"><div class="post-meta"><span class="post-lang">${esc(p.lang.toUpperCase())}</span><span>${esc(p.source || 'LoopWear')}</span>${date ? `<span>${esc(date)}</span>` : ''}</div>
+    <div class="post-title">${esc(p.title)}</div>${postSummary(p) ? `<p class="post-sum">${esc(postSummary(p))}</p>` : ''}
+    <span class="post-go">${esc(t(external ? 'blog_read' : 'blog_more'))} ${external ? '↗' : '→'}</span></div></a>`;
+}
+
 export function methodSheet() {
   return sheet(`<h2>${esc(t('method_title'))}</h2>
     <p>${esc(t('method_1'))}</p><p>${esc(t('method_2'))}</p><p>${esc(t('method_3'))}</p><p class="small muted">${esc(t('method_4'))}</p><p class="small muted">${esc(t('method_eq'))}</p>
     <details><summary class="link" style="cursor:pointer">${esc(t('sources'))}</summary>
-      <p class="small" style="margin-top:8px"><a href="https://www.calpsc.org/_files/ugd/ad724e_df7e1839e74d4c00949f03f25f24f24e.pdf" target="_blank" rel="noopener">${esc(t('src_1'))}</a></p>
-      <p class="small" style="margin-top:8px"><a href="https://www.mdpi.com/2071-1050/17/10/4411" target="_blank" rel="noopener">${esc(t('src_2'))}</a></p>
+      <p class="small" style="margin-top:8px">${esc(t('src_1'))}</p>
+      <p class="small" style="margin-top:8px"><a href="https://www.epa.gov/greenvehicles/greenhouse-gas-emissions-typical-passenger-vehicle" target="_blank" rel="noopener">${esc(t('src_2'))}</a></p>
     </details>
     <button class="btn line navy" data-close>${esc(t('close'))}</button>`);
 }

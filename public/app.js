@@ -1,5 +1,5 @@
 // Üye ekranları ve yönlendirme. Ekran düzenleri LoopWear_Demo_2.html'den gelir; davranış MVP şartnamesine göredir.
-import { S, t, setLang, esc, api, post, errText, catName, matName, condName, colorName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, confetti, pointsPop, countUp, notifTone, sheet, confirmSheet, pickSheet, qrSvg, compressPhoto, impactMetrics, methodSheet, notifText, name, LOOPY } from './core.js';
+import { S, t, setLang, esc, api, post, errText, catName, matName, condName, colorName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, postCard, postSummary, confetti, pointsPop, countUp, notifTone, sheet, confirmSheet, pickSheet, qrSvg, compressPhoto, impactMetrics, methodSheet, notifText, name, LOOPY } from './core.js';
 import { renderAdmin } from './admin.js';
 
 const app = document.getElementById('app');
@@ -103,18 +103,22 @@ async function home() {
     <div class="row between" style="margin-bottom:18px"><div><div style="font-size:19px;font-weight:900">${x('hello', { name: u.display_name })} 👋</div><p class="muted" style="margin-top:2px">${x('home_sub')}</p></div>${headerIcons()}</div>
     ${pointsCard(u)}
     <div class="card solid flat" style="background:#EDF1EA;margin-top:2px"><div class="row between" style="align-items:flex-start"><div style="max-width:210px"><div style="font-weight:900;font-size:16px;line-height:1.3;margin-bottom:10px">${x('home_cta_title')}</div><a class="btn small" href="#/drop" style="padding:11px 18px;display:inline-flex">${x('drop_cta')}</a></div><img src="${LOOPY.face}" class="mascot" style="width:64px;margin-top:-6px" alt=""></div></div>
-    <div class="row between" style="margin:18px 0 10px"><h2 class="section-title" style="margin:0">${x('new_items')}</h2><a class="link" href="#/discover">${x('see_all')}</a></div>
+    <div class="row between" style="margin:18px 0 10px"><h2 class="section-title" style="margin:0">${x('nav_discover')}</h2><a class="link" href="#/discover">${x('see_all')}</a></div>
     <div id="fresh">${skeleton()}</div>
+    <div class="row between" style="margin:22px 0 10px"><h2 class="section-title" style="margin:0">${x('blog_title')}</h2><a class="link" href="#/blog">${x('blog_all')}</a></div>
+    <div id="homeBlog">${skeleton()}</div>
     <div id="giftCard"></div>
     <h2 class="section-title">${x('impact_section')}</h2><div id="impactCard"></div>
   </div>${nav('home')}`);
   try {
-    const [{ items }, gifts, imp] = await Promise.all([api('/api/items'), api('/api/gifts'), api('/api/me/impact')]);
+    const [{ items }, gifts, imp, { posts }] = await Promise.all([api('/api/items'), api('/api/gifts'), api('/api/me/impact'), api('/api/blog').catch(() => ({ posts: [] }))]);
+    const hb = document.getElementById('homeBlog');
+    if (hb) hb.innerHTML = posts.length ? `<div class="stack">${posts.slice(0, 3).map(postCard).join('')}</div>` : `<div class="card center"><p class="muted">${x('blog_empty')}</p></div>`;
     const box = document.getElementById('fresh');
     if (!box) return;
-    const fresh = [...items].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 6);
+    const fresh = [...items].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 4);
     box.innerHTML = fresh.length
-      ? `<div class="chiprow">${fresh.map((it) => `<div class="pcard" data-open="${esc(it.id)}" style="min-width:150px;width:150px;flex-shrink:0"><div class="prod-illustration" style="height:100px;aspect-ratio:auto">${it.photos[0] ? `<img loading="lazy" src="${esc(it.photos[0])}" alt="">` : ''}</div><div style="padding:10px"><div style="font-weight:900;font-size:12.5px">${esc(catName(it.category))}</div><div style="font-weight:800;color:var(--sage-dark);font-size:12px;margin-top:3px">${fmt(it.point_value)} ${x('points')}</div></div></div>`).join('')}</div>`
+      ? `<div class="grid2">${fresh.map(itemCard).join('')}</div><a class="btn line navy" href="#/discover" style="margin-top:12px">${x('go_discover')}</a>`
       : `<div class="card center stack"><h3>${x('no_items_title')}</h3><p class="muted">${x('no_items_body')}</p><a class="btn" href="#/drop">${x('drop_cta')}</a></div>`;
     if (gifts.gifts.some((g) => g.stock > 0)) document.getElementById('giftCard').innerHTML = `<a class="card solid flat row between" href="#/gifts" style="background:#FBF4EC;text-decoration:none;margin-top:14px"><div><div style="font-weight:900;font-size:14.5px">${x('gifts_card_title')}</div><p class="muted" style="margin-top:2px">${x('gifts_card_body')}</p></div>${IC.chevronRight}</a>`;
     document.getElementById('impactCard').innerHTML = `<a class="card solid flat row gap12" href="#/impact" style="background:#F5F1E6;text-decoration:none">${IC.leafCircle}<div><div style="font-weight:900;font-size:14.5px">${imp.total ? x('impact_summary', { n: imp.total }) : x('impact_title')}</div><p class="muted" style="margin-top:2px">${imp.total ? `${x('ref_label')}: ${imp.co2.count ? `${fmt(imp.co2.sum, 1)} kg CO₂e` : x('data_soon')}` : x('impact_summary_none')}</p></div></a>`;
@@ -160,7 +164,7 @@ async function filterAction(key) {
   else if (key === 'ready') f.ready = !f.ready;
   else if (key === 'sort') f.sort = f.sort ? '' : 'points';
   else {
-    const opts = { category: c.categories.map((o) => ({ value: o.id, label: name(o) })), size: c.sizes.map((s) => ({ value: s, label: sizeName(s) })), material: c.materials.map((o) => ({ value: o.id, label: name(o) })) }[key];
+    const opts = { category: c.categories.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) })), size: c.sizes.map((s) => ({ value: s, label: sizeName(s) })), material: c.materials.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) })) }[key];
     const v = await pickSheet(t(`filter_${key}`), [{ value: '', label: t('all') }, ...opts], { search: key === 'category' ? t('search_category') : null, current: f[key] });
     if (v === undefined) return;
     f[key] = v;
@@ -228,7 +232,7 @@ async function reserve(id) {
 
 // ---------- Bırak akışı ----------
 const STEPS = ['cap_consent', 'cap_photos', 'cap_info', 'cap_station'];
-const newDraft = () => ({ step: 1, consents: [false, false, false, false], category: '', condition: '', size: '', material: '', color: '', station_id: S.user?.default_station_id || activeStations()[0]?.id || '', photos: [null, null, null, null], client_key: crypto.randomUUID?.() || String(Date.now() + Math.random()) });
+const newDraft = () => ({ step: 1, consents: [false, false, false, false], category: '', condition: '', size: '', material: '', color: '', station_id: activeStations().some((s) => s.id === S.user?.default_station_id) ? S.user.default_station_id : activeStations()[0]?.id || '', photos: [null, null, null, null], client_key: crypto.randomUUID?.() || String(Date.now() + Math.random()) });
 const stepBar = (d) => `<div class="backbar"><button class="iconbtn" data-drop-back aria-label="${x('back')}">${IC.back}</button><span class="cap">${d.step} / ${STEPS.length} — ${x(STEPS[d.step - 1])}</span><span style="width:38px"></span></div>`;
 
 function dropFlow() {
@@ -271,10 +275,10 @@ function dropFlow() {
 async function dropPick(key) {
   const d = S.draft; const c = S.catalog;
   const map = {
-    category: [t('d_category'), c.categories.map((o) => ({ value: o.id, label: name(o) })), { search: t('search_category') }],
+    category: [t('d_category'), c.categories.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) })), { search: t('search_category') }],
     condition: [t('d_condition'), c.conditions.map((o) => ({ value: o.id, label: name(o) }))],
     size: [t('d_size'), c.sizes.map((s) => ({ value: s, label: sizeName(s) }))],
-    material: [t('d_material'), c.materials.map((o) => ({ value: o.id, label: name(o) }))],
+    material: [t('d_material'), c.materials.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) }))],
     color: [t('d_color'), c.colors.map((o) => ({ value: o.id, label: name(o) }))],
   }[key];
   const v = await pickSheet(map[0], map[1], { ...(map[2] || {}), current: d[key] });
@@ -464,7 +468,7 @@ async function profile() {
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
     <h2 class="section-title">LoopWear</h2>
-    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${installed ? '' : `${row(IC.doc, t('install_app'), '/indir')}${div}`}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
+    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${installed ? '' : `${row(IC.doc, t('install_app'), '/indir')}${div}`}${row(IC.leaf, t('blog_title'), '#/blog')}${div}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
     ${u.role === 'admin' ? `<div class="card" style="border-color:var(--coral)">${row(IC.shield, t('admin_panel'), '#/admin')}</div>` : ''}
     <button class="center" style="width:100%;color:var(--coral);font-weight:800;padding:10px 0 20px" data-logout>${x('log_out')}</button></div>`);
 }
@@ -492,6 +496,29 @@ async function support() {
     const { requests: r } = await api('/api/me/support');
     if (r.length) document.getElementById('sl').innerHTML = `<h2 class="section-title">${x('support_mine')}</h2><div class="card">${r.map((s, i) => `${i ? '<div class="divider" style="margin:6px 0"></div>' : ''}<div class="fin"><span><span style="display:block;font-weight:700;font-size:13.5px">${x(`support_kind_${s.kind}`)}</span><span class="muted" style="font-size:12px">${esc(when(s.created_at))}</span></span><span class="muted" style="font-size:12px">${x(`support_${s.status}`)}</span></div>`).join('')}</div>`;
   } catch { /* liste olmadan da form çalışır */ }
+}
+
+// ---------- İklim gündemi ----------
+async function blog() {
+  screen(`${titleBar(t('blog_title'))}<div class="content bare"><p class="muted" style="margin-bottom:14px">${x('blog_sub')}</p><div id="bl">${skeleton()}</div></div>`);
+  try {
+    const { posts } = await api('/api/blog');
+    const box = document.getElementById('bl');
+    if (box) box.innerHTML = posts.length ? `<div class="stack">${posts.map(postCard).join('')}</div>` : `<div class="card center"><p class="muted">${x('blog_empty')}</p></div>`;
+  } catch { const box = document.getElementById('bl'); if (box) box.innerHTML = errorBox(); }
+}
+async function blogPost(id) {
+  screen(`<div class="content bare">${skeleton()}</div>`);
+  let p;
+  try { ({ post: p } = await api(`/api/blog/${id}`)); } catch { screen(`<div class="content">${errorBox()}</div>`); return; }
+  screen(`${titleBar(t('blog_title'))}<div class="content bare">
+    ${p.image ? `<img src="${esc(p.image)}" alt="" style="width:100%;border-radius:18px;margin-bottom:14px">` : ''}
+    <div class="post-meta" style="margin-bottom:6px"><span class="post-lang">${esc(p.lang.toUpperCase())}</span><span>${esc(p.source || 'LoopWear')}</span><span>${esc(p.published_on || '')}</span></div>
+    <h1 class="page-title" style="font-size:22px">${esc(p.title)}</h1>
+    ${postSummary(p) ? `<p class="muted" style="margin-bottom:12px">${esc(postSummary(p))}</p>` : ''}
+    ${(p.body || '').split(/\n{2,}/).filter(Boolean).map((para) => `<p style="margin-bottom:12px;line-height:1.6">${esc(para)}</p>`).join('')}
+    ${p.url ? `<a class="btn line navy" href="${esc(p.url)}" target="_blank" rel="noopener">${x('blog_read')} ↗</a>` : ''}
+  </div>`);
 }
 
 async function notifications() {
@@ -548,6 +575,7 @@ async function route() {
     return renderAdmin(app, a, b);
   }
   if (head === 'item') return itemDetail(a);
+  if (head === 'blog') return a ? blogPost(a) : blog();
   if (head === 'reserve') return reserveScreen(a);
   if (head === 'qr') return qrScreen(a, b);
   if (head === 'drop') {

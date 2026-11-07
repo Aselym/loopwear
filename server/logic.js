@@ -8,7 +8,6 @@ export const catalog = JSON.parse(readFileSync(new URL('./catalog.json', import.
 const catById = Object.fromEntries(catalog.categories.map((c) => [c.id, c]));
 const matById = Object.fromEntries(catalog.materials.map((m) => [m.id, m]));
 const condById = Object.fromEntries(catalog.conditions.map((c) => [c.id, c]));
-const closed = new Set(catalog.closed);
 
 export const DEFAULT_SETTINGS = { starter_points: '20', drop_hours: '24', pickup_hours: '24', return_hours: '72' };
 
@@ -25,15 +24,15 @@ export function computePoints(category, condition) {
   return Math.max(0, Math.min(100, c.points + k.points));
 }
 
+// Ekibin veri setindeki ürün başına referans değer; eşleşme yoksa (bilmiyorum, eski seçenek) değer uydurulmaz
 export function computeImpact(category, material) {
-  const c = catById[category]; const m = matById[material];
-  const usable = c && m && m.co2 != null && !closed.has(`${category}|${material}`);
+  const v = catalog.impacts[`${category}|${material}`];
   return {
-    weight_kg: usable ? c.weight : null,
-    co2_factor: usable ? m.co2 : null,
-    water_factor: usable ? m.water : null,
-    co2e_reference: usable ? c.weight * m.co2 : null,
-    water_reference: usable ? c.weight * m.water : null,
+    weight_kg: v ? catById[category].weight : null,
+    co2_factor: null,
+    water_factor: null,
+    co2e_reference: v ? v[0] : null,
+    water_reference: v ? v[1] : null,
     methodology_version: catalog.impact_version,
   };
 }
@@ -80,6 +79,7 @@ export async function createItem(db, ownerId, input, opts = {}) {
   if (!opts.assisted && !(Array.isArray(consents) && consents.length === 4 && consents.every(Boolean))) throw new AppError('consents_required');
   if (!Array.isArray(photos) || photos.length < 3 || photos.length > 4) throw new AppError('photos_required');
   if (!catById[category] || !matById[material] || !condById[condition]) throw new AppError('invalid_item');
+  if (catById[category].retired || matById[material].retired) throw new AppError('invalid_item');
   if (!catalog.sizes.includes(size) || !catalog.colors.some((c) => c.id === color)) throw new AppError('invalid_item');
   const decoded = photos.map((p, i) => {
     const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(p || '');

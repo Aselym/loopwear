@@ -120,6 +120,30 @@ Object.assign(DICT.tr, {
   eq_car: '≈ {km} km araba yolculuğu', eq_water_days: '≈ bir kişinin {n} günlük içme suyu', eq_water_years: '≈ bir kişinin {n} yıllık içme suyu', eq_bottles: '≈ {n} şişe su',
   method_eq: 'Karşılaştırmalar yaklaşıktır: bir binek aracın kilometre başına ortalama 0,17 kg CO₂e saldığı ve bir kişinin günde 2 litre su içtiği varsayılır.',
 });
+Object.assign(DICT.tr, {
+  method_1: 'Her kıyafet türü için varsayılan bir ağırlık (örneğin tişört 150 g, mont 1.200 g) ve seçtiğin materyalin yaşam döngüsü değerleri kullanılarak benzer yeni bir ürünün referans CO₂ ve su değeri bulunur.',
+  method_3: 'Değerler LoopWear ekibinin hazırladığı 16 kıyafet türü ve 12 materyalden oluşan etki veri setinden gelir. Keten, naylon ve elastan karışımında yakın bir materyalin değeri, geri dönüştürülmüş materyallerde tahmini değer kullanılır. Materyal bilgisi kullanıcı beyanına dayanır.',
+  method_eq: 'Karşılaştırmalar yaklaşıktır: araç için ABD Çevre Koruma Ajansı’nın (EPA) tipik binek araç değeri olan yaklaşık 0,244 kg CO₂e/km (1 kg CO₂e ≈ 4,1 km), su için kişi başı yılda 730 litre (günde 2 litre) içme suyu kullanılır.',
+  src_1: 'LoopWear etki veri seti (16 kıyafet türü, 12 materyal)', src_2: 'EPA, Greenhouse Gas Emissions from a Typical Passenger Vehicle',
+  how_built_1: 'Kıyafet türünün varsayılan ağırlığı', how_built_2: 'Seçilen materyalin yaşam döngüsü değeri',
+});
+Object.assign(DICT.tr, {
+  blog_title: 'İklim gündemi', blog_sub: 'İklim krizi, moda ve döngüsel yaşam üzerine güncel haber ve yazılar.', blog_all: 'Tüm yazılar', blog_read: 'Habere git', blog_more: 'Devamını oku', blog_empty: 'Henüz yazı yok.', go_discover: 'Keşfet’e git',
+  a_blog: 'İklim gündemi', a_blog_new: 'Yeni yazı ya da haber', a_blog_title: 'Başlık', a_blog_date: 'Tarih', a_blog_source: 'Kaynak', a_blog_url: 'Haber bağlantısı', a_blog_summary: 'Kısa özet', a_blog_body: 'Yazı metni', a_blog_body_hint: 'Kendi yazınız için metni buraya yazın. Haber paylaşıyorsanız bağlantı ve özet yeterli.', a_blog_image: 'Fotoğraf', a_blog_publish: 'Yayınla', a_blog_list: 'Yayındaki yazılar ({n})', a_blog_delete: 'Kaldır', a_blog_delete_q: 'Bu yazı İklim gündemi’nden kalkar.',
+  e_title_required: 'Başlık yaz.', e_invalid_url: 'Bağlantı https:// ile başlamalı.', e_body_or_url: 'Bir haber bağlantısı ya da yazı metni ekle.',
+});
+Object.assign(DICT.en, {
+  blog_title: 'Climate news', blog_sub: 'Latest news and stories on the climate crisis, fashion and circular living.', blog_all: 'All posts', blog_read: 'Read the story', blog_more: 'Read more', blog_empty: 'No posts yet.', go_discover: 'Go to Discover',
+  a_blog: 'Climate news', a_blog_new: 'New post or news link', a_blog_title: 'Title', a_blog_date: 'Date', a_blog_source: 'Source', a_blog_url: 'News link', a_blog_summary: 'Short summary', a_blog_body: 'Post text', a_blog_body_hint: 'Write your own post here. For news, a link and summary are enough.', a_blog_image: 'Photo', a_blog_publish: 'Publish', a_blog_list: 'Published posts ({n})', a_blog_delete: 'Remove', a_blog_delete_q: 'This post will be removed from Climate news.',
+  e_title_required: 'Add a title.', e_invalid_url: 'The link must start with https://', e_body_or_url: 'Add a news link or post text.',
+});
+Object.assign(DICT.en, {
+  method_1: 'We use a default weight for each clothing type (for example 150 g for a T-shirt, 1,200 g for a coat) and the life-cycle values of the material you chose to find the reference CO₂ and water of a similar new item.',
+  method_3: 'Values come from the LoopWear impact dataset prepared by the team, covering 16 clothing types and 12 materials. Linen, nylon and the elastane blend use the value of a close material; recycled materials use estimates. Material information is based on the member’s declaration.',
+  method_eq: 'Comparisons are approximate: for cars we use the US Environmental Protection Agency (EPA) typical passenger vehicle value of about 0.244 kg CO₂e per km (1 kg CO₂e ≈ 4.1 km); for water, 730 litres of drinking water per person per year (2 litres a day).',
+  src_1: 'LoopWear impact dataset (16 clothing types, 12 materials)', src_2: 'EPA, Greenhouse Gas Emissions from a Typical Passenger Vehicle',
+  how_built_1: 'Default weight of the clothing type', how_built_2: 'Life-cycle value of the chosen material',
+});
 Object.assign(DICT.en, {
   ph_optional: 'Care label', photos_body: 'Photograph the front, back, a detail and the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
   eq_car: '≈ {km} km by car', eq_water_days: '≈ {n} days of drinking water for one person', eq_water_years: '≈ {n} years of drinking water for one person', eq_bottles: '≈ {n} bottles of water',

@@ -1,337 +1,316 @@
 {
  "scoring_version": "v0.1",
- "impact_version": "v2",
+ "impact_version": "v3",
  "categories": [
   {
-   "id": "coat",
-   "tr": "Kaban",
-   "en": "Coat",
-   "points": 60,
-   "weight": 1.06
-  },
-  {
-   "id": "puffer",
-   "tr": "Kışlık mont / şişme mont",
-   "en": "Winter / puffer jacket",
-   "points": 60,
-   "weight": 0.75
-  },
-  {
-   "id": "leather_jacket",
-   "tr": "Deri / suni deri ceket",
-   "en": "Leather / faux leather jacket",
-   "points": 55,
-   "weight": 0.75
-  },
-  {
-   "id": "trench",
-   "tr": "Trençkot / yağmurluk",
-   "en": "Trench coat / raincoat",
-   "points": 55,
-   "weight": 0.8
-  },
-  {
-   "id": "blazer",
-   "tr": "Blazer ceket",
-   "en": "Blazer",
-   "points": 50,
-   "weight": 0.31
-  },
-  {
-   "id": "denim_jacket",
-   "tr": "Kot ceket",
-   "en": "Denim jacket",
-   "points": 50,
-   "weight": 0.71
-  },
-  {
-   "id": "other_jacket",
-   "tr": "Diğer ceketler",
-   "en": "Other jackets",
-   "points": 50,
-   "weight": 0.31
-  },
-  {
-   "id": "sweater",
-   "tr": "Kazak",
-   "en": "Sweater",
-   "points": 45,
-   "weight": 0.31
-  },
-  {
-   "id": "cardigan",
-   "tr": "Hırka",
-   "en": "Cardigan",
-   "points": 45,
-   "weight": 0.31
-  },
-  {
-   "id": "sweatshirt",
-   "tr": "Sweatshirt",
-   "en": "Sweatshirt",
-   "points": 45,
-   "weight": 0.31
-  },
-  {
-   "id": "hoodie",
-   "tr": "Kapüşonlu sweatshirt",
-   "en": "Hoodie",
-   "points": 45,
-   "weight": 0.31
-  },
-  {
-   "id": "vest",
-   "tr": "Yelek",
-   "en": "Vest",
-   "points": 40,
-   "weight": 0.31
-  },
-  {
-   "id": "suit",
-   "tr": "Takım elbise",
-   "en": "Suit",
-   "points": 55,
-   "weight": 0.67
-  },
-  {
-   "id": "jeans",
-   "tr": "Jean pantolon",
-   "en": "Jeans",
-   "points": 45,
-   "weight": 0.51
-  },
-  {
-   "id": "trousers",
-   "tr": "Kumaş pantolon",
-   "en": "Trousers",
-   "points": 45,
-   "weight": 0.36
-  },
-  {
-   "id": "dress",
-   "tr": "Elbise",
-   "en": "Dress",
-   "points": 45,
-   "weight": 0.18
-  },
-  {
-   "id": "jumpsuit",
-   "tr": "Tulum",
-   "en": "Jumpsuit",
-   "points": 45,
-   "weight": 0.36
-  },
-  {
-   "id": "sweatpants",
-   "tr": "Eşofman altı",
-   "en": "Sweatpants",
-   "points": 40,
-   "weight": 0.21
-  },
-  {
-   "id": "shirt",
-   "tr": "Gömlek",
-   "en": "Shirt",
-   "points": 40,
-   "weight": 0.16
-  },
-  {
-   "id": "blouse",
-   "tr": "Bluz",
-   "en": "Blouse",
-   "points": 35,
-   "weight": 0.16
-  },
-  {
-   "id": "skirt",
-   "tr": "Etek",
-   "en": "Skirt",
-   "points": 35,
-   "weight": 0.24
-  },
-  {
-   "id": "shorts",
-   "tr": "Şort / bermuda",
-   "en": "Shorts",
-   "points": 30,
-   "weight": 0.2
-  },
-  {
-   "id": "polo",
-   "tr": "Polo yaka tişört",
-   "en": "Polo shirt",
-   "points": 30,
-   "weight": 0.25
+   "id": "tshirt",
+   "tr": "Tişört",
+   "en": "T-shirt",
+   "points": 25,
+   "weight": 0.15
   },
   {
    "id": "longsleeve",
    "tr": "Uzun kollu tişört",
    "en": "Long-sleeve T-shirt",
    "points": 30,
-   "weight": 0.16
+   "weight": 0.2
   },
   {
-   "id": "tshirt",
-   "tr": "Kısa kollu tişört",
-   "en": "Short-sleeve T-shirt",
-   "points": 25,
-   "weight": 0.16
+   "id": "shirt",
+   "tr": "Gömlek",
+   "en": "Shirt",
+   "points": 40,
+   "weight": 0.25
+  },
+  {
+   "id": "blouse",
+   "tr": "Bluz",
+   "en": "Blouse",
+   "points": 35,
+   "weight": 0.2
+  },
+  {
+   "id": "sweatshirt",
+   "tr": "Sweatshirt",
+   "en": "Sweatshirt",
+   "points": 45,
+   "weight": 0.45
+  },
+  {
+   "id": "hoodie",
+   "tr": "Kapüşonlu sweatshirt",
+   "en": "Hoodie",
+   "points": 45,
+   "weight": 0.6
+  },
+  {
+   "id": "sweater",
+   "tr": "Kazak",
+   "en": "Sweater",
+   "points": 45,
+   "weight": 0.45
+  },
+  {
+   "id": "cardigan",
+   "tr": "Hırka",
+   "en": "Cardigan",
+   "points": 45,
+   "weight": 0.45
+  },
+  {
+   "id": "jeans",
+   "tr": "Jean pantolon",
+   "en": "Jeans",
+   "points": 45,
+   "weight": 0.8
+  },
+  {
+   "id": "trousers",
+   "tr": "Kumaş pantolon",
+   "en": "Trousers",
+   "points": 45,
+   "weight": 0.5
+  },
+  {
+   "id": "shorts",
+   "tr": "Şort",
+   "en": "Shorts",
+   "points": 30,
+   "weight": 0.25
+  },
+  {
+   "id": "skirt",
+   "tr": "Etek",
+   "en": "Skirt",
+   "points": 35,
+   "weight": 0.3
+  },
+  {
+   "id": "dress",
+   "tr": "Elbise",
+   "en": "Dress",
+   "points": 45,
+   "weight": 0.45
+  },
+  {
+   "id": "mont",
+   "tr": "Mont",
+   "en": "Coat / puffer",
+   "points": 60,
+   "weight": 1.2
+  },
+  {
+   "id": "jacket",
+   "tr": "Ceket",
+   "en": "Jacket",
+   "points": 50,
+   "weight": 0.7
+  },
+  {
+   "id": "blazer",
+   "tr": "Blazer",
+   "en": "Blazer",
+   "points": 50,
+   "weight": 0.65
+  },
+  {
+   "id": "coat",
+   "tr": "Kaban",
+   "en": "Coat",
+   "points": 60,
+   "weight": 1.06,
+   "retired": true
+  },
+  {
+   "id": "puffer",
+   "tr": "Kışlık mont / şişme mont",
+   "en": "Winter / puffer jacket",
+   "points": 60,
+   "weight": 0.75,
+   "retired": true
+  },
+  {
+   "id": "leather_jacket",
+   "tr": "Deri / suni deri ceket",
+   "en": "Leather / faux leather jacket",
+   "points": 55,
+   "weight": 0.75,
+   "retired": true
+  },
+  {
+   "id": "trench",
+   "tr": "Trençkot / yağmurluk",
+   "en": "Trench coat / raincoat",
+   "points": 55,
+   "weight": 0.8,
+   "retired": true
+  },
+  {
+   "id": "denim_jacket",
+   "tr": "Kot ceket",
+   "en": "Denim jacket",
+   "points": 50,
+   "weight": 0.71,
+   "retired": true
+  },
+  {
+   "id": "other_jacket",
+   "tr": "Diğer ceketler",
+   "en": "Other jackets",
+   "points": 50,
+   "weight": 0.31,
+   "retired": true
+  },
+  {
+   "id": "vest",
+   "tr": "Yelek",
+   "en": "Vest",
+   "points": 40,
+   "weight": 0.31,
+   "retired": true
+  },
+  {
+   "id": "suit",
+   "tr": "Takım elbise",
+   "en": "Suit",
+   "points": 55,
+   "weight": 0.67,
+   "retired": true
+  },
+  {
+   "id": "jumpsuit",
+   "tr": "Tulum",
+   "en": "Jumpsuit",
+   "points": 45,
+   "weight": 0.36,
+   "retired": true
+  },
+  {
+   "id": "sweatpants",
+   "tr": "Eşofman altı",
+   "en": "Sweatpants",
+   "points": 40,
+   "weight": 0.21,
+   "retired": true
+  },
+  {
+   "id": "polo",
+   "tr": "Polo yaka tişört",
+   "en": "Polo shirt",
+   "points": 30,
+   "weight": 0.25,
+   "retired": true
   }
  ],
  "materials": [
   {
-   "id": "acrylic",
-   "tr": "Akrilik",
-   "en": "Acrylic",
-   "co2": 64,
-   "water": 1900
-  },
-  {
    "id": "cotton",
    "tr": "Pamuk",
-   "en": "Cotton",
-   "co2": 85.2,
-   "water": 15000
+   "en": "Cotton"
+  },
+  {
+   "id": "polyester",
+   "tr": "Polyester",
+   "en": "Polyester"
+  },
+  {
+   "id": "viscose",
+   "tr": "Viskon",
+   "en": "Viscose"
+  },
+  {
+   "id": "wool",
+   "tr": "Yün",
+   "en": "Wool"
+  },
+  {
+   "id": "acrylic",
+   "tr": "Akrilik",
+   "en": "Acrylic"
+  },
+  {
+   "id": "linen",
+   "tr": "Keten",
+   "en": "Linen"
+  },
+  {
+   "id": "polyamide",
+   "tr": "Naylon / poliamid",
+   "en": "Nylon / polyamide"
+  },
+  {
+   "id": "recycled_polyester",
+   "tr": "Geri dönüştürülmüş polyester",
+   "en": "Recycled polyester"
+  },
+  {
+   "id": "recycled_cotton",
+   "tr": "Geri dönüştürülmüş pamuk",
+   "en": "Recycled cotton"
+  },
+  {
+   "id": "cotton_polyester",
+   "tr": "Pamuk-polyester karışımı (%50/%50)",
+   "en": "Cotton-polyester blend (50/50)"
+  },
+  {
+   "id": "cotton_viscose",
+   "tr": "Pamuk-viskon karışımı (%50/%50)",
+   "en": "Cotton-viscose blend (50/50)"
+  },
+  {
+   "id": "polyester_elastane",
+   "tr": "Polyester-elastan karışımı (%95/%5)",
+   "en": "Polyester-elastane blend (95/5)"
+  },
+  {
+   "id": "unknown",
+   "tr": "Bilmiyorum",
+   "en": "Don't know"
   },
   {
    "id": "leather",
    "tr": "Deri",
    "en": "Leather",
    "co2": 469.4,
-   "water": 2100
-  },
-  {
-   "id": "linen",
-   "tr": "Keten",
-   "en": "Linen",
-   "co2": 63.6,
-   "water": 2500
-  },
-  {
-   "id": "polyamide",
-   "tr": "Poliamid",
-   "en": "Polyamide",
-   "co2": 72.1,
-   "water": 2000
-  },
-  {
-   "id": "polyester",
-   "tr": "Polyester",
-   "en": "Polyester",
-   "co2": 73.2,
-   "water": 1900
+   "water": 2100,
+   "retired": true
   },
   {
    "id": "rubber",
    "tr": "Kauçuk",
    "en": "Rubber",
    "co2": 17.4,
-   "water": 200
+   "water": 200,
+   "retired": true
   },
   {
    "id": "silk",
    "tr": "İpek",
    "en": "Silk",
    "co2": 83.2,
-   "water": 13400
+   "water": 13400,
+   "retired": true
   },
   {
    "id": "elastane",
    "tr": "Elastan",
    "en": "Elastane",
    "co2": 73.1,
-   "water": 2000
-  },
-  {
-   "id": "viscose",
-   "tr": "Viskon",
-   "en": "Viscose",
-   "co2": 65.5,
-   "water": 2000
-  },
-  {
-   "id": "wool",
-   "tr": "Yün",
-   "en": "Wool",
-   "co2": 136.3,
-   "water": 2200
+   "water": 2000,
+   "retired": true
   },
   {
    "id": "blend",
    "tr": "Karışım",
    "en": "Blend",
    "co2": null,
-   "water": null
-  },
-  {
-   "id": "unknown",
-   "tr": "Diğer / bilmiyorum",
-   "en": "Other / don't know",
-   "co2": null,
-   "water": null
+   "water": null,
+   "retired": true
   }
  ],
- "closed": [
-  "blazer|elastane",
-  "blazer|rubber",
-  "blouse|elastane",
-  "blouse|rubber",
-  "cardigan|elastane",
-  "cardigan|rubber",
-  "coat|elastane",
-  "coat|rubber",
-  "denim_jacket|elastane",
-  "denim_jacket|leather",
-  "denim_jacket|rubber",
-  "dress|elastane",
-  "dress|rubber",
-  "hoodie|elastane",
-  "hoodie|rubber",
-  "jeans|elastane",
-  "jeans|rubber",
-  "jumpsuit|elastane",
-  "jumpsuit|rubber",
-  "leather_jacket|acrylic",
-  "leather_jacket|cotton",
-  "leather_jacket|elastane",
-  "leather_jacket|linen",
-  "leather_jacket|polyamide",
-  "leather_jacket|polyester",
-  "leather_jacket|rubber",
-  "leather_jacket|silk",
-  "leather_jacket|viscose",
-  "leather_jacket|wool",
-  "longsleeve|elastane",
-  "longsleeve|rubber",
-  "other_jacket|elastane",
-  "other_jacket|rubber",
-  "polo|elastane",
-  "polo|rubber",
-  "puffer|elastane",
-  "puffer|rubber",
-  "shirt|elastane",
-  "shirt|rubber",
-  "shorts|elastane",
-  "shorts|rubber",
-  "skirt|elastane",
-  "skirt|rubber",
-  "suit|elastane",
-  "suit|rubber",
-  "sweater|elastane",
-  "sweater|rubber",
-  "sweatpants|elastane",
-  "sweatpants|rubber",
-  "sweatshirt|elastane",
-  "sweatshirt|rubber",
-  "trench|elastane",
-  "trench|rubber",
-  "trousers|elastane",
-  "trousers|rubber",
-  "tshirt|elastane",
-  "tshirt|rubber",
-  "vest|elastane",
-  "vest|rubber"
- ],
+ "closed": [],
  "conditions": [
   {
    "id": "very_good",
@@ -438,5 +417,775 @@
    "tr": "Çok renkli",
    "en": "Multicolour"
   }
- ]
+ ],
+ "impacts": {
+  "tshirt|cotton": [
+   8.26,
+   1454
+  ],
+  "tshirt|polyester": [
+   7.09,
+   184
+  ],
+  "tshirt|viscose": [
+   6.35,
+   194
+  ],
+  "tshirt|wool": [
+   13.21,
+   213
+  ],
+  "tshirt|acrylic": [
+   6.2,
+   184
+  ],
+  "tshirt|linen": [
+   8.26,
+   1454
+  ],
+  "tshirt|polyamide": [
+   7.09,
+   184
+  ],
+  "tshirt|recycled_polyester": [
+   3.55,
+   92
+  ],
+  "tshirt|recycled_cotton": [
+   4.13,
+   727
+  ],
+  "tshirt|cotton_polyester": [
+   7.67,
+   819
+  ],
+  "tshirt|cotton_viscose": [
+   7.3,
+   824
+  ],
+  "tshirt|polyester_elastane": [
+   7.09,
+   184
+  ],
+  "longsleeve|cotton": [
+   11.01,
+   1938
+  ],
+  "longsleeve|polyester": [
+   9.46,
+   245
+  ],
+  "longsleeve|viscose": [
+   8.46,
+   258
+  ],
+  "longsleeve|wool": [
+   17.61,
+   284
+  ],
+  "longsleeve|acrylic": [
+   8.27,
+   245
+  ],
+  "longsleeve|linen": [
+   11.01,
+   1938
+  ],
+  "longsleeve|polyamide": [
+   9.46,
+   245
+  ],
+  "longsleeve|recycled_polyester": [
+   4.73,
+   123
+  ],
+  "longsleeve|recycled_cotton": [
+   5.5,
+   969
+  ],
+  "longsleeve|cotton_polyester": [
+   10.23,
+   1092
+  ],
+  "longsleeve|cotton_viscose": [
+   9.74,
+   1098
+  ],
+  "longsleeve|polyester_elastane": [
+   9.46,
+   245
+  ],
+  "shirt|cotton": [
+   13.76,
+   2422
+  ],
+  "shirt|polyester": [
+   11.82,
+   307
+  ],
+  "shirt|viscose": [
+   10.58,
+   323
+  ],
+  "shirt|wool": [
+   22.01,
+   355
+  ],
+  "shirt|acrylic": [
+   10.34,
+   307
+  ],
+  "shirt|linen": [
+   13.76,
+   2422
+  ],
+  "shirt|polyamide": [
+   11.82,
+   307
+  ],
+  "shirt|recycled_polyester": [
+   5.91,
+   153
+  ],
+  "shirt|recycled_cotton": [
+   6.88,
+   1211
+  ],
+  "shirt|cotton_polyester": [
+   12.79,
+   1365
+  ],
+  "shirt|cotton_viscose": [
+   12.17,
+   1373
+  ],
+  "shirt|polyester_elastane": [
+   11.82,
+   307
+  ],
+  "blouse|cotton": [
+   11.01,
+   1938
+  ],
+  "blouse|polyester": [
+   9.46,
+   245
+  ],
+  "blouse|viscose": [
+   8.46,
+   258
+  ],
+  "blouse|wool": [
+   17.61,
+   284
+  ],
+  "blouse|acrylic": [
+   8.27,
+   245
+  ],
+  "blouse|linen": [
+   11.01,
+   1938
+  ],
+  "blouse|polyamide": [
+   9.46,
+   245
+  ],
+  "blouse|recycled_polyester": [
+   4.73,
+   123
+  ],
+  "blouse|recycled_cotton": [
+   5.5,
+   969
+  ],
+  "blouse|cotton_polyester": [
+   10.23,
+   1092
+  ],
+  "blouse|cotton_viscose": [
+   9.74,
+   1098
+  ],
+  "blouse|polyester_elastane": [
+   9.46,
+   245
+  ],
+  "sweatshirt|cotton": [
+   24.77,
+   4360
+  ],
+  "sweatshirt|polyester": [
+   21.28,
+   552
+  ],
+  "sweatshirt|viscose": [
+   19.04,
+   581
+  ],
+  "sweatshirt|wool": [
+   39.62,
+   640
+  ],
+  "sweatshirt|acrylic": [
+   18.6,
+   552
+  ],
+  "sweatshirt|linen": [
+   24.77,
+   4360
+  ],
+  "sweatshirt|polyamide": [
+   21.28,
+   552
+  ],
+  "sweatshirt|recycled_polyester": [
+   10.64,
+   276
+  ],
+  "sweatshirt|recycled_cotton": [
+   12.38,
+   2180
+  ],
+  "sweatshirt|cotton_polyester": [
+   23.02,
+   2456
+  ],
+  "sweatshirt|cotton_viscose": [
+   21.9,
+   2471
+  ],
+  "sweatshirt|polyester_elastane": [
+   21.28,
+   552
+  ],
+  "hoodie|cotton": [
+   33.02,
+   5814
+  ],
+  "hoodie|polyester": [
+   28.37,
+   736
+  ],
+  "hoodie|viscose": [
+   25.39,
+   775
+  ],
+  "hoodie|wool": [
+   52.83,
+   853
+  ],
+  "hoodie|acrylic": [
+   24.81,
+   736
+  ],
+  "hoodie|linen": [
+   33.02,
+   5814
+  ],
+  "hoodie|polyamide": [
+   28.37,
+   736
+  ],
+  "hoodie|recycled_polyester": [
+   14.19,
+   368
+  ],
+  "hoodie|recycled_cotton": [
+   16.51,
+   2907
+  ],
+  "hoodie|cotton_polyester": [
+   30.7,
+   3275
+  ],
+  "hoodie|cotton_viscose": [
+   29.21,
+   3295
+  ],
+  "hoodie|polyester_elastane": [
+   28.37,
+   736
+  ],
+  "sweater|cotton": [
+   24.77,
+   4360
+  ],
+  "sweater|polyester": [
+   21.28,
+   552
+  ],
+  "sweater|viscose": [
+   19.04,
+   581
+  ],
+  "sweater|wool": [
+   39.62,
+   640
+  ],
+  "sweater|acrylic": [
+   18.6,
+   552
+  ],
+  "sweater|linen": [
+   24.77,
+   4360
+  ],
+  "sweater|polyamide": [
+   21.28,
+   552
+  ],
+  "sweater|recycled_polyester": [
+   10.64,
+   276
+  ],
+  "sweater|recycled_cotton": [
+   12.38,
+   2180
+  ],
+  "sweater|cotton_polyester": [
+   23.02,
+   2456
+  ],
+  "sweater|cotton_viscose": [
+   21.9,
+   2471
+  ],
+  "sweater|polyester_elastane": [
+   21.28,
+   552
+  ],
+  "cardigan|cotton": [
+   24.77,
+   4360
+  ],
+  "cardigan|polyester": [
+   21.28,
+   552
+  ],
+  "cardigan|viscose": [
+   19.04,
+   581
+  ],
+  "cardigan|wool": [
+   39.62,
+   640
+  ],
+  "cardigan|acrylic": [
+   18.6,
+   552
+  ],
+  "cardigan|linen": [
+   24.77,
+   4360
+  ],
+  "cardigan|polyamide": [
+   21.28,
+   552
+  ],
+  "cardigan|recycled_polyester": [
+   10.64,
+   276
+  ],
+  "cardigan|recycled_cotton": [
+   12.38,
+   2180
+  ],
+  "cardigan|cotton_polyester": [
+   23.02,
+   2456
+  ],
+  "cardigan|cotton_viscose": [
+   21.9,
+   2471
+  ],
+  "cardigan|polyester_elastane": [
+   21.28,
+   552
+  ],
+  "jeans|cotton": [
+   44.03,
+   7752
+  ],
+  "jeans|polyester": [
+   37.83,
+   982
+  ],
+  "jeans|viscose": [
+   33.85,
+   1034
+  ],
+  "jeans|wool": [
+   70.44,
+   1137
+  ],
+  "jeans|acrylic": [
+   33.08,
+   982
+  ],
+  "jeans|linen": [
+   44.03,
+   7752
+  ],
+  "jeans|polyamide": [
+   37.83,
+   982
+  ],
+  "jeans|recycled_polyester": [
+   18.91,
+   491
+  ],
+  "jeans|recycled_cotton": [
+   22.02,
+   3876
+  ],
+  "jeans|cotton_polyester": [
+   40.93,
+   4367
+  ],
+  "jeans|cotton_viscose": [
+   38.94,
+   4393
+  ],
+  "jeans|polyester_elastane": [
+   37.83,
+   982
+  ],
+  "trousers|cotton": [
+   27.52,
+   4845
+  ],
+  "trousers|polyester": [
+   23.64,
+   614
+  ],
+  "trousers|viscose": [
+   21.16,
+   646
+  ],
+  "trousers|wool": [
+   44.02,
+   711
+  ],
+  "trousers|acrylic": [
+   20.67,
+   614
+  ],
+  "trousers|linen": [
+   27.52,
+   4845
+  ],
+  "trousers|polyamide": [
+   23.64,
+   614
+  ],
+  "trousers|recycled_polyester": [
+   11.82,
+   307
+  ],
+  "trousers|recycled_cotton": [
+   13.76,
+   2422
+  ],
+  "trousers|cotton_polyester": [
+   25.58,
+   2729
+  ],
+  "trousers|cotton_viscose": [
+   24.34,
+   2746
+  ],
+  "trousers|polyester_elastane": [
+   23.64,
+   614
+  ],
+  "shorts|cotton": [
+   13.76,
+   2422
+  ],
+  "shorts|polyester": [
+   11.82,
+   307
+  ],
+  "shorts|viscose": [
+   10.58,
+   323
+  ],
+  "shorts|wool": [
+   22.01,
+   355
+  ],
+  "shorts|acrylic": [
+   10.34,
+   307
+  ],
+  "shorts|linen": [
+   13.76,
+   2422
+  ],
+  "shorts|polyamide": [
+   11.82,
+   307
+  ],
+  "shorts|recycled_polyester": [
+   5.91,
+   153
+  ],
+  "shorts|recycled_cotton": [
+   6.88,
+   1211
+  ],
+  "shorts|cotton_polyester": [
+   12.79,
+   1365
+  ],
+  "shorts|cotton_viscose": [
+   12.17,
+   1373
+  ],
+  "shorts|polyester_elastane": [
+   11.82,
+   307
+  ],
+  "skirt|cotton": [
+   16.51,
+   2907
+  ],
+  "skirt|polyester": [
+   14.19,
+   368
+  ],
+  "skirt|viscose": [
+   12.69,
+   388
+  ],
+  "skirt|wool": [
+   26.41,
+   426
+  ],
+  "skirt|acrylic": [
+   12.4,
+   368
+  ],
+  "skirt|linen": [
+   16.51,
+   2907
+  ],
+  "skirt|polyamide": [
+   14.19,
+   368
+  ],
+  "skirt|recycled_polyester": [
+   7.09,
+   184
+  ],
+  "skirt|recycled_cotton": [
+   8.26,
+   1454
+  ],
+  "skirt|cotton_polyester": [
+   15.35,
+   1638
+  ],
+  "skirt|cotton_viscose": [
+   14.6,
+   1647
+  ],
+  "skirt|polyester_elastane": [
+   14.19,
+   368
+  ],
+  "dress|cotton": [
+   24.77,
+   4360
+  ],
+  "dress|polyester": [
+   21.28,
+   552
+  ],
+  "dress|viscose": [
+   19.04,
+   581
+  ],
+  "dress|wool": [
+   39.62,
+   640
+  ],
+  "dress|acrylic": [
+   18.6,
+   552
+  ],
+  "dress|linen": [
+   24.77,
+   4360
+  ],
+  "dress|polyamide": [
+   21.28,
+   552
+  ],
+  "dress|recycled_polyester": [
+   10.64,
+   276
+  ],
+  "dress|recycled_cotton": [
+   12.38,
+   2180
+  ],
+  "dress|cotton_polyester": [
+   23.02,
+   2456
+  ],
+  "dress|cotton_viscose": [
+   21.9,
+   2471
+  ],
+  "dress|polyester_elastane": [
+   21.28,
+   552
+  ],
+  "mont|cotton": [
+   66.05,
+   11628
+  ],
+  "mont|polyester": [
+   56.74,
+   1473
+  ],
+  "mont|viscose": [
+   50.78,
+   1550
+  ],
+  "mont|wool": [
+   105.66,
+   1705
+  ],
+  "mont|acrylic": [
+   49.61,
+   1473
+  ],
+  "mont|linen": [
+   66.05,
+   11628
+  ],
+  "mont|polyamide": [
+   56.74,
+   1473
+  ],
+  "mont|recycled_polyester": [
+   28.37,
+   736
+  ],
+  "mont|recycled_cotton": [
+   33.02,
+   5814
+  ],
+  "mont|cotton_polyester": [
+   61.4,
+   6550
+  ],
+  "mont|cotton_viscose": [
+   58.41,
+   6589
+  ],
+  "mont|polyester_elastane": [
+   56.74,
+   1473
+  ],
+  "jacket|cotton": [
+   38.53,
+   6783
+  ],
+  "jacket|polyester": [
+   33.1,
+   859
+  ],
+  "jacket|viscose": [
+   29.62,
+   904
+  ],
+  "jacket|wool": [
+   61.63,
+   995
+  ],
+  "jacket|acrylic": [
+   28.94,
+   859
+  ],
+  "jacket|linen": [
+   38.53,
+   6783
+  ],
+  "jacket|polyamide": [
+   33.1,
+   859
+  ],
+  "jacket|recycled_polyester": [
+   16.55,
+   430
+  ],
+  "jacket|recycled_cotton": [
+   19.26,
+   3392
+  ],
+  "jacket|cotton_polyester": [
+   35.81,
+   3821
+  ],
+  "jacket|cotton_viscose": [
+   34.07,
+   3844
+  ],
+  "jacket|polyester_elastane": [
+   33.1,
+   859
+  ],
+  "blazer|cotton": [
+   35.78,
+   6298
+  ],
+  "blazer|polyester": [
+   30.74,
+   798
+  ],
+  "blazer|viscose": [
+   27.5,
+   840
+  ],
+  "blazer|wool": [
+   57.23,
+   924
+  ],
+  "blazer|acrylic": [
+   26.87,
+   798
+  ],
+  "blazer|linen": [
+   35.78,
+   6298
+  ],
+  "blazer|polyamide": [
+   30.74,
+   798
+  ],
+  "blazer|recycled_polyester": [
+   15.37,
+   399
+  ],
+  "blazer|recycled_cotton": [
+   17.89,
+   3149
+  ],
+  "blazer|cotton_polyester": [
+   33.26,
+   3548
+  ],
+  "blazer|cotton_viscose": [
+   31.64,
+   3569
+  ],
+  "blazer|polyester_elastane": [
+   30.74,
+   798
+  ]
+ }
 }

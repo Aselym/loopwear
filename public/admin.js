@@ -1,8 +1,8 @@
 // Yönetici paneli: telefonda ve bilgisayarda aynı ekranlar.
-import { S, t, esc, api, post, errText, catName, matName, condName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, sheet, pickSheet, compressPhoto, name } from './core.js';
+import { S, t, esc, api, post, errText, catName, matName, condName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, sheet, confirmSheet, pickSheet, compressPhoto, name } from './core.js';
 
 const x = (k, p) => esc(t(k, p));
-const TABS = ['summary', 'scan', 'drops', 'pickups', 'returns', 'support', 'intake', 'users', 'impact', 'settings', 'audit'];
+const TABS = ['summary', 'scan', 'drops', 'pickups', 'returns', 'support', 'blog', 'intake', 'users', 'impact', 'settings', 'audit'];
 let root; let counts = {};
 
 const emptyBox = () => `<div class="card center muted">${x('a_empty')}</div>`;
@@ -114,6 +114,39 @@ async function support() {
     <button class="btn small green" data-support-done="${esc(r.id)}">${x('a_support_done')}</button></div>`).join('')}</div>` : emptyBox()}`);
 }
 
+// ---------- İklim gündemi ----------
+async function blog() {
+  const { posts } = await api('/api/blog');
+  const today = new Date().toISOString().slice(0, 10);
+  set(`<h1 style="margin-bottom:14px">${x('a_blog')}</h1><div class="stack" style="max-width:640px">
+    <form id="bf" class="card stack" novalidate><h3 style="margin:0">${x('a_blog_new')}</h3>
+      <div class="field"><label for="bt">${x('a_blog_title')}</label><input class="input" id="bt" maxlength="200"></div>
+      <div class="row gap12"><div class="field" style="flex:1"><label for="bl">${x('language')}</label><select class="input" id="bl"><option value="tr">Türkçe</option><option value="en">English</option></select></div>
+      <div class="field" style="flex:1"><label for="bd">${x('a_blog_date')}</label><input class="input" id="bd" type="date" value="${today}"></div></div>
+      <div class="field"><label for="bs">${x('a_blog_source')}</label><input class="input" id="bs" maxlength="80" placeholder="LoopWear"></div>
+      <div class="field"><label for="bu">${x('a_blog_url')}</label><input class="input" id="bu" type="url" placeholder="https://"></div>
+      <div class="field"><label for="bsum">${x('a_blog_summary')}</label><textarea class="input" id="bsum" maxlength="600" rows="3"></textarea></div>
+      <div class="field"><label for="bb">${x('a_blog_body')}</label><textarea class="input" id="bb" maxlength="8000" rows="6"></textarea><span class="hint">${x('a_blog_body_hint')}</span></div>
+      <div class="field"><label for="bi">${x('a_blog_image')}</label><input class="input" id="bi" type="file" accept="image/*"></div>
+      <div class="err" hidden></div><button class="btn" type="submit">${x('a_blog_publish')}</button></form>
+    <h3 style="margin:8px 0 0">${x('a_blog_list', { n: posts.length })}</h3>
+    ${posts.map((p) => `<div class="card row between gap12"><div style="min-width:0"><b>${esc(p.title)}</b><div class="small muted">${esc(p.source || 'LoopWear')} · ${esc(p.published_on || '')} · ${esc(p.lang.toUpperCase())}</div></div><button class="btn small danger" style="width:auto;flex:none" data-blog-del="${esc(p.id)}">${x('a_blog_delete')}</button></div>`).join('')}
+  </div>`);
+  const f = document.getElementById('bf');
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const err = f.querySelector('.err'); err.hidden = true;
+    const v = (id) => f.querySelector(id).value;
+    try {
+      const file = f.querySelector('#bi').files[0];
+      const image = file ? await compressPhoto(file) : null;
+      await post('/api/admin/blog', { title: v('#bt'), lang: v('#bl'), published_on: v('#bd'), source: v('#bs'), url: v('#bu'), summary: v('#bsum'), body: v('#bb'), image });
+      toast(t('a_done'), 'success');
+      blog();
+    } catch (ex) { err.textContent = errText(ex); err.hidden = false; }
+  });
+}
+
 // ---------- QR okutma ----------
 let stream = null; let raf = 0;
 function stopScanner() {
@@ -197,7 +230,7 @@ function intakeView(code) {
 }
 async function intakePick(key) {
   const c = S.catalog;
-  const map = { category: [c.categories.map((o) => ({ value: o.id, label: name(o) })), t('search_category')], condition: [c.conditions.map((o) => ({ value: o.id, label: name(o), right: `+${o.points}` }))], size: [c.sizes.map((s) => ({ value: s, label: sizeName(s) }))], material: [c.materials.map((o) => ({ value: o.id, label: name(o) }))], color: [c.colors.map((o) => ({ value: o.id, label: name(o) }))] }[key];
+  const map = { category: [c.categories.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) })), t('search_category')], condition: [c.conditions.map((o) => ({ value: o.id, label: name(o), right: `+${o.points}` }))], size: [c.sizes.map((s) => ({ value: s, label: sizeName(s) }))], material: [c.materials.filter((o) => !o.retired).map((o) => ({ value: o.id, label: name(o) }))], color: [c.colors.map((o) => ({ value: o.id, label: name(o) }))] }[key];
   const v = await pickSheet(t(`d_${key}`), map[0], { search: map[1], current: intake[key] });
   if (v !== undefined) { intake[key] = v; intakeView(); }
 }
@@ -264,7 +297,7 @@ async function audit() {
     ${entries.map((e) => `<tr><td style="white-space:nowrap">${when(e.created_at)}</td><td>${esc(e.actor || t('a_system'))}</td><td>${esc(e.entity_type)}: ${esc(e.action)}</td><td>${esc(e.old_value ?? '')}${e.new_value != null ? ` / ${esc(e.new_value)}` : ''}</td><td>${esc(e.reason ?? '')}</td></tr>`).join('')}</tbody></table></div>`);
 }
 
-const VIEWS = { support, summary, drops, pickups, returns, users, impact, settings, audit };
+const VIEWS = { support, blog, summary, drops, pickups, returns, users, impact, settings, audit };
 
 export async function renderAdmin(app, a, b) {
   root = app;
@@ -287,6 +320,7 @@ document.addEventListener('click', async (e) => {
   const q = (s) => e.target.closest(s); let el;
   if ((el = q('[data-approve-drop]'))) await approveDropFlow(el.dataset.approveDrop, el.dataset.cond);
   else if ((el = q('[data-reject-drop]'))) await rejectDropFlow(el.dataset.rejectDrop);
+  else if ((el = q('[data-blog-del]'))) { if (await confirmSheet(t('a_blog_delete'), t('a_blog_delete_q'), t('a_blog_delete'), { danger: true })) await act(() => post(`/api/admin/blog/${el.dataset.blogDel}/delete`)); }
   else if ((el = q('[data-support-done]'))) { const r = await reasonSheet(t('a_support_done'), [t('a_preset_replied')], { okLabel: t('a_support_done') }); if (r) await act(() => post(`/api/admin/support/${el.dataset.supportDone}/close`, r)); }
   else if ((el = q('[data-approve-pick]'))) { const r = await reasonSheet(t('a_approve_qr'), [t('a_preset_pick')], { okLabel: t('a_approve_qr') }); if (r) await act(() => post(`/api/admin/reservations/${el.dataset.approvePick}/approve`, r)); }
   else if ((el = q('[data-reject-pick]'))) { const r = await reasonSheet(t('a_reject'), [t('a_preset_unavail')], { okLabel: t('a_reject'), danger: true }); if (r) await act(() => post(`/api/admin/reservations/${el.dataset.rejectPick}/reject`, r)); }

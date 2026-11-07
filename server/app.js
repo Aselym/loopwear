@@ -1,6 +1,7 @@
 // HTTP katmanı: yönlendirme, oturum, statik dosyalar. İş kuralları logic.js'te.
 import { createHash, randomBytes, scrypt as scryptCb, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
+import { readFileSync } from 'node:fs';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -27,14 +28,32 @@ const hashToken = (t) => createHash('sha256').update(t).digest('hex');
 
 export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPassword = process.env.ADMIN_PASSWORD } = {}) {
   await db.q(`INSERT INTO stations (id, name_tr, name_en, campus_label, active, sort_order) VALUES
-    ('stand','COP31 LoopStation','COP31 LoopStation','Antalya',TRUE,0),
-    ('north','Kuzey LoopStation','North LoopStation','Boğaziçi Üniversitesi',TRUE,1),
-    ('south','Güney LoopStation','South LoopStation','Boğaziçi Üniversitesi',TRUE,2)
+    ('stand','COP31 LoopStation','COP31 LoopStation','Antalya',FALSE,0),
+    ('north','Kuzey Kampüs Station','North Campus Station','Boğaziçi Üniversitesi',TRUE,1),
+    ('south','Güney Kampüs Station','South Campus Station','Boğaziçi Üniversitesi',TRUE,2)
     ON CONFLICT (id) DO NOTHING`);
   const [opened] = await db.q("SELECT 1 FROM settings WHERE key='stations_bogazici'");
   if (!opened) {
     await db.q("UPDATE stations SET active=TRUE, campus_label='Boğaziçi Üniversitesi' WHERE id IN ('north','south')");
     await db.q("INSERT INTO settings (key, value) VALUES ('stations_bogazici','1') ON CONFLICT (key) DO NOTHING");
+  }
+  const [campus] = await db.q("SELECT 1 FROM settings WHERE key='stations_kampus'");
+  if (!campus) {
+    await db.q("UPDATE stations SET active=FALSE WHERE id='stand'");
+    await db.q("UPDATE stations SET name_tr='Kuzey Kampüs Station', name_en='North Campus Station', active=TRUE WHERE id='north'");
+    await db.q("UPDATE stations SET name_tr='Güney Kampüs Station', name_en='South Campus Station', active=TRUE WHERE id='south'");
+    await db.q("UPDATE users SET default_station_id='north' WHERE default_station_id='stand'");
+    await db.q("INSERT INTO settings (key, value) VALUES ('stations_kampus','1') ON CONFLICT (key) DO NOTHING");
+  }
+  // İklim gündemi: ilk açılışta seçilmiş haberler bir kez eklenir; sonrası panelden yönetilir
+  const [blogSeeded] = await db.q("SELECT 1 FROM settings WHERE key='blog_seed'");
+  if (!blogSeeded) {
+    const posts = JSON.parse(readFileSync(new URL('./blog_seed.json', import.meta.url), 'utf8'));
+    for (const p of posts) {
+      await db.q('INSERT INTO blog_posts (id, lang, title, source, url, summary_tr, summary_en, published_on) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+        [newId(), p.lang, p.title, p.source, p.url, p.summary_tr, p.summary_en, p.published_on]);
+    }
+    await db.q("INSERT INTO settings (key, value) VALUES ('blog_seed','1') ON CONFLICT (key) DO NOTHING");
   }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
@@ -43,7 +62,7 @@ export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPass
     const email = adminEmail.toLowerCase();
     const [u] = await db.q('SELECT id FROM users WHERE email=$1', [email]);
     if (!u) {
-      await db.q("INSERT INTO users (id, email, password_hash, display_name, role, default_station_id, public_code) VALUES ($1,$2,$3,'LoopWear','admin','stand',$4)",
+      await db.q("INSERT INTO users (id, email, password_hash, display_name, role, default_station_id, public_code) VALUES ($1,$2,$3,'LoopWear','admin','north',$4)",
         [newId(), email, await hashPassword(adminPassword), `UQ-${randomBytes(12).toString('base64url')}`]);
     }
   }
@@ -301,6 +320,16 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     return L.createSupportRequest(db, user.id, body);
   });
 
+  // ----- İklim gündemi -----
+  const POST_COLS = "id, lang, title, source, url, summary_tr, summary_en, body, to_char(published_on, 'YYYY-MM-DD') AS published_on, image IS NOT NULL AS has_image";
+  const postView = ({ has_image: img, ...p }) => ({ ...p, image: img ? `/api/blog/${p.id}/image` : null });
+  route('GET', '/api/blog', pub, async () => ({ posts: (await db.q(`SELECT ${POST_COLS} FROM blog_posts ORDER BY published_on DESC NULLS LAST, created_at DESC LIMIT 100`)).map(postView) }));
+  route('GET', '/api/blog/:id', pub, async ({ params }) => {
+    const [p] = await db.q(`SELECT ${POST_COLS} FROM blog_posts WHERE id=$1`, [params.id]);
+    if (!p) throw new AppError('not_found', 404);
+    return { post: postView(p) };
+  });
+
   route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock FROM gifts WHERE active ORDER BY points') }));
   route('POST', '/api/gifts/:id/buy', member, async ({ user, params }) => L.buyGift(db, user.id, params.id));
 
@@ -396,6 +425,38 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   });
   route('GET', '/api/admin/support', admin, async () => ({ requests: await db.q("SELECT s.id, s.kind, s.message, s.created_at, u.display_name, u.email FROM support_requests s JOIN users u ON u.id=s.user_id WHERE s.status='OPEN' ORDER BY s.created_at") }));
   route('POST', '/api/admin/support/:id/close', admin, async ({ user, params, body }) => { await L.closeSupportRequest(db, user.id, params.id, body); return {}; });
+  route('POST', '/api/admin/blog', admin, async ({ user, body }) => {
+    const title = String(body.title || '').trim().slice(0, 200);
+    if (!title) throw new AppError('title_required');
+    const url = String(body.url || '').trim().slice(0, 500);
+    if (url && !/^https?:\/\/\S+$/i.test(url)) throw new AppError('invalid_url');
+    const summary = String(body.summary || '').trim().slice(0, 600);
+    const text = String(body.body || '').trim().slice(0, 8000);
+    if (!url && !text) throw new AppError('body_or_url');
+    let image = null; let mime = null;
+    if (body.image) {
+      const m = /^data:(image\/(?:jpeg|png|webp));base64,(.+)$/.exec(body.image);
+      if (!m) throw new AppError('invalid_photo');
+      image = Buffer.from(m[2], 'base64'); mime = m[1];
+      if (image.length > 3 * 1024 * 1024) throw new AppError('photo_too_large');
+    }
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(body.published_on || '') ? body.published_on : new Date().toISOString().slice(0, 10);
+    const id = newId();
+    await db.tx(async (t) => {
+      await t.q('INSERT INTO blog_posts (id, lang, title, source, url, summary_tr, summary_en, body, image, image_mime, published_on, created_by) VALUES ($1,$2,$3,$4,$5,$6,$6,$7,$8,$9,$10,$11)',
+        [id, body.lang === 'en' ? 'en' : 'tr', title, String(body.source || '').trim().slice(0, 80) || null, url || null, summary || null, text || null, image, mime, date, user.id]);
+      await L.audit(t, user.id, 'blog', id, 'create', null, title, 'blog_create');
+    });
+    return { id };
+  });
+  route('POST', '/api/admin/blog/:id/delete', admin, async ({ user, params }) => {
+    await db.tx(async (t) => {
+      const [p] = await t.q('DELETE FROM blog_posts WHERE id=$1 RETURNING title', [params.id]);
+      if (!p) throw new AppError('not_found', 404);
+      await L.audit(t, user.id, 'blog', params.id, 'delete', p.title, null, 'blog_delete');
+    });
+    return {};
+  });
   route('POST', '/api/admin/users/:id/points', admin, async ({ user, params, body }) => L.adjustPoints(db, user.id, params.id, body.amount, body.reason));
 
   const impactRows = async (query) => {
@@ -512,6 +573,13 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
         if (!img) return json(res, 404, { error: 'not_found' });
         res.writeHead(200, { 'Content-Type': img.mime, 'Cache-Control': 'public, max-age=31536000, immutable' });
         return res.end(Buffer.from(img.data));
+      }
+      const blogImg = /^\/api\/blog\/([^/]+)\/image$/.exec(url.pathname);
+      if (blogImg && req.method === 'GET') {
+        const [img] = await db.q('SELECT image, image_mime FROM blog_posts WHERE id=$1 AND image IS NOT NULL', [blogImg[1]]);
+        if (!img) return json(res, 404, { error: 'not_found' });
+        res.writeHead(200, { 'Content-Type': img.image_mime, 'Cache-Control': 'public, max-age=86400' });
+        return res.end(Buffer.from(img.image));
       }
       if (!url.pathname.startsWith('/api/')) return await serveStatic(req, res, url.pathname);
       const r = routes.find((x) => x.method === req.method && x.re.test(url.pathname));

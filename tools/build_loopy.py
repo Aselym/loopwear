@@ -1,127 +1,130 @@
-# Demodaki kırpık Loopy başından tam logo üretir: yün yumağın kesik yerlerini aynı renkte
-# sargılarla tamamlar, çeneyi yuvarlar, halkanın içini saydam yapar. Çıktılar: public/assets.
-# Çalıştırma: python tools/build_loopy.py <demo-yuz.png>   (LoopWear_Demo_2.html içindeki 130x117 görsel)
+# Ekibin gönderdiği yüksek çözünürlüklü tam boy Loopy'den uygulama görsellerini üretir:
+# saydam tam boy (giriş ve sonuç ekranları), yalnız baş (logo, kartlar) ve uygulama ikonları.
+# Çalıştırma: python tools/build_loopy.py <loopy-tam-boy.webp|png>
 import sys
 from collections import deque
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageFilter
 
-K = 6  # büyütme
-CROP_W = 114  # sağındaki konuşma balonu parçaları dışarıda kalır
 BG = (252, 248, 237)  # temanın --bg rengi
-GREEN, BEIGE, BLUE, RED = (92, 124, 98), (226, 204, 168), (63, 95, 134), (196, 96, 90)
-# Dıştan içe sargılar: (kalınlık birimi, renk)
-BANDS = [(9, GREEN), (5, BEIGE), (7, BLUE), (8, GREEN), (5, RED), (7, BEIGE), (9, GREEN), (6, BLUE), (9, GREEN), (6, BEIGE), (60, GREEN)]
+OUT = 'public/assets'
 
 
-def flood(mask, seeds):
-    h, w = mask.shape
-    seen = np.zeros_like(mask)
+def cutout(im):
+    """Kenara bağlı arka planı saydam yapar; kenarlarda renk farkına göre yumuşak geçiş bırakır."""
+    a = np.asarray(im.convert('RGB')).astype(int)
+    h, w, _ = a.shape
+    ref = np.median(np.concatenate([a[:8].reshape(-1, 3), a[-8:].reshape(-1, 3), a[:, :8].reshape(-1, 3), a[:, -8:].reshape(-1, 3)]), axis=0)
+    d = np.abs(a - ref).sum(axis=2)
+    near = d < 30
+    seen = np.zeros((h, w), bool)
     q = deque()
-    for y, x in seeds:
-        if mask[y, x] and not seen[y, x]:
+    for y, x in [(y, x) for y in (0, h - 1) for x in range(w)] + [(y, x) for y in range(h) for x in (0, w - 1)]:
+        if near[y, x] and not seen[y, x]:
             seen[y, x] = True
             q.append((y, x))
     while q:
         y, x = q.popleft()
         for n, m in ((y + 1, x), (y - 1, x), (y, x + 1), (y, x - 1)):
-            if 0 <= n < h and 0 <= m < w and mask[n, m] and not seen[n, m]:
+            if 0 <= n < h and 0 <= m < w and near[n, m] and not seen[n, m]:
                 seen[n, m] = True
                 q.append((n, m))
-    return seen
+    soft = np.clip((d - 8) / 22, 0, 1)
+    alpha = np.where(seen, soft, 1.0)
+    out = im.convert('RGBA')
+    out.putalpha(Image.fromarray((alpha * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8)))
+    return out.crop(out.getbbox()), ref
 
 
-def fit_circle(pts):
-    x, y = np.array(pts, float).T
-    A = np.c_[2 * x, 2 * y, np.ones(len(x))]
-    sol = np.linalg.lstsq(A, x * x + y * y, rcond=None)[0]
-    return sol[0], sol[1], float(np.sqrt(sol[2] + sol[0] ** 2 + sol[1] ** 2))
+def hull(points):
+    pts = sorted(set(points))
+    def half(seq):
+        h = []
+        for p in seq:
+            while len(h) >= 2 and (h[-1][0] - h[-2][0]) * (p[1] - h[-2][1]) - (h[-1][1] - h[-2][1]) * (p[0] - h[-2][0]) <= 0:
+                h.pop()
+            h.append(p)
+        return h
+    lower, upper = half(pts), half(reversed(pts))
+    return lower[:-1] + upper[:-1]
 
 
-def build(src):
-    im = Image.open(src).convert('RGB').crop((0, 0, CROP_W, 117))
-    a = np.asarray(im).astype(int)
-    h, w, _ = a.shape
-    white = a.min(axis=2) >= 232
-    edge = [(0, x) for x in range(w)] + [(y, w - 1) for y in range(h)]
-    outside = flood(white, edge)
-    hole = white & ~outside
-    hole[int(h * 0.3):, :] = False
-    bg = outside | hole
-    fg = ~bg
-
-    # Daire: halkanın olmadığı üst sol sınır ve sağ sınır noktalarından
-    pts = []
-    for y in range(int(h * 0.42), int(h * 0.8)):
-        xs = np.where(fg[y])[0]
-        if len(xs):
-            pts.append((xs[-1] + 1, y))
-    for x in range(int(w * 0.12), int(w * 0.5)):
-        ys = np.where(fg[:, x])[0]
-        if len(ys):
-            pts.append((x, ys[0]))
-    cx, cy, r = fit_circle(pts)
-
-    pad = 4
-    ox = (max(0, r - cx) + pad) * K
-    oy = pad * K
-    W = int((cx + r + pad) * K + ox)
-    H = int((cy + r + pad) * K + oy)
-    C = (cx * K + ox, cy * K + oy)
-    R = r * K
-
-    # Altta tam yumak: iç içe sargılar, her biri ince ipliklerden
-    disc = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    d = ImageDraw.Draw(disc)
-    d.ellipse((C[0] - R, C[1] - R, C[0] + R, C[1] + R), fill=GREEN + (255,))
-    off = 0.0
-    step = K * 0.55
-    for units, col in BANDS:
-        for i in range(int(units * K / step)):
-            rr = R - off
-            if rr <= 0:
+def head(full, ref):
+    """Renkli yün sargılarının dış çizgisiyle başı (halka dahil) gövdeden ayırır; halkanın içini boşaltır."""
+    a = np.asarray(full).astype(int)
+    rgb, al = a[..., :3], a[..., 3]
+    sat = rgb.max(axis=2) - rgb.min(axis=2)
+    yarn = (sat > 70) & (al > 200)
+    rows = yarn.sum(axis=1)
+    top = int(np.argmax(rows > 20))
+    end = top
+    gap = 0
+    for y in range(top, len(rows)):
+        if rows[y] > 20:
+            end, gap = y, 0
+        else:
+            gap += 1
+            if gap > 12:
                 break
-            shade = 1 + 0.2 * np.sin(i * 2.1)
-            c = tuple(min(255, int(v * shade)) for v in col) + (255,)
-            d.ellipse((C[0] - rr, C[1] - rr, C[0] + rr, C[1] + rr), outline=c, width=int(step) + 2)
-            off += step
-    disc = disc.filter(ImageFilter.GaussianBlur(K * 0.28))
+    yarn[end + 1:] = False
+    ys, xs = np.nonzero(yarn)
+    step = max(1, len(xs) // 20000)
+    poly = hull(list(zip(xs[::step].tolist(), ys[::step].tolist())))
+    from PIL import ImageDraw
+    mask = Image.new('L', full.size, 0)
+    ImageDraw.Draw(mask).polygon(poly, fill=255)
+    m = np.asarray(mask.filter(ImageFilter.GaussianBlur(2))).astype(float) / 255
+    # Halkanın içi: yumağın gövdesi başlamadan önceki satırlarda arka plan rengindeki boşluk
+    width = yarn.sum(axis=1)
+    ball_top = int(np.argmax(width > width.max() * 0.45))
+    d = np.abs(rgb - ref).sum(axis=2)
+    hole = np.ones_like(m)
+    hole[:ball_top] = np.clip((d[:ball_top] - 8) / 22, 0, 1)
+    # Boyun: her sütunda en alttaki sargının altı kesilir
+    low = np.full(yarn.shape[1], -1)
+    cols = np.nonzero(yarn.any(axis=0))[0]
+    low[cols] = yarn.shape[0] - 1 - np.argmax(yarn[::-1, cols], axis=0)
+    # Seyrek sütunlarda alt çizgi komşulardan tamamlanır, sonra yumuşatılır
+    k = max(3, yarn.shape[1] // 12)
+    low = np.array([low[max(0, i - k): i + k + 1].max() for i in range(len(low))])
+    kern = np.ones(k) / k
+    low = np.convolve(np.pad(low, k, mode='edge'), kern, mode='same')[k:-k]
+    yy = np.arange(yarn.shape[0])[:, None]
+    hole *= np.clip((low[None, :] + 3 - yy) / 4, 0, 1)
+    # Yumağın elipsi dışında kalan omuz parçaları (askı halkası hariç)
+    ys2, xs2 = np.nonzero(yarn[ball_top:])
+    cy, cx = (ball_top + ys2.max() + ball_top + ys2.min()) / 2, (xs2.max() + xs2.min()) / 2
+    ry, rx = (ys2.max() - ys2.min()) / 2 * 1.02, (xs2.max() - xs2.min()) / 2 * 1.02
+    xx = np.arange(yarn.shape[1])[None, :]
+    r = np.sqrt(((xx - cx) / rx) ** 2 + ((yy - cy) / ry) ** 2)
+    ell = np.clip((1.0 - r) * 60, 0, 1)
+    ell[:int(cy)] = 1
+    hole *= ell
+    alpha = np.minimum(m, al / 255) * hole
+    out = full.copy()
+    out.putalpha(Image.fromarray((alpha * 255).astype(np.uint8)))
+    return out.crop(out.getbbox())
 
-    big = im.resize((w * K, h * K), Image.LANCZOS).filter(ImageFilter.UnsharpMask(radius=K, percent=70, threshold=2))
-    alpha = Image.fromarray((fg * 255).astype(np.uint8)).resize((w * K, h * K), Image.BICUBIC).filter(ImageFilter.GaussianBlur(K * 0.35))
-    art = big.convert('RGBA')
-    art.putalpha(alpha)
-    layer = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    layer.paste(art, (int(ox), int(oy)))
 
-    # Özgün görsel yuvarlak bir çeneyle biter; kesik kenar ve eller sargının altında kalır
-    yy, xx = np.mgrid[0:H, 0:W]
-    cut = h * K + oy
-    dx = (xx - C[0]) / R
-    chin = cut - 3 * K - (dx ** 2) * 20 * K
-    fade = np.clip((chin - yy) / (2.2 * K), 0, 1)
-    left_edge = np.clip((xx - ox - 1.5 * K) / (2 * K), 0, 1)
-    la = np.asarray(layer).copy()
-    la[..., 3] = (la[..., 3] * fade * left_edge).astype(np.uint8)
-    canvas = Image.new('RGBA', (W, H), (0, 0, 0, 0))
-    canvas.alpha_composite(disc)
-    canvas.alpha_composite(Image.fromarray(la, 'RGBA'))
-    return canvas
+def fit(im, height):
+    return im.resize((round(im.width * height / im.height), height), Image.LANCZOS)
 
 
-def icon(logo, size, scale, bg=BG):
-    out = Image.new('RGB', (size, size), bg)
+def icon(logo, size, scale):
+    out = Image.new('RGB', (size, size), BG)
     k = size * scale / max(logo.size)
-    fit = logo.resize((int(logo.width * k), int(logo.height * k)), Image.LANCZOS)
-    out.paste(fit, ((size - fit.width) // 2, (size - fit.height) // 2), fit)
+    f = logo.resize((round(logo.width * k), round(logo.height * k)), Image.LANCZOS)
+    out.paste(f, ((size - f.width) // 2, (size - f.height) // 2), f)
     return out
 
 
 if __name__ == '__main__':
-    logo = build(sys.argv[1])
-    logo.save('public/assets/loopy-logo.png', optimize=True)
+    full, ref = cutout(Image.open(sys.argv[1]))
+    fit(full, 720).save(f'{OUT}/loopy-hero.png', optimize=True)
+    h = head(full, ref)
+    fit(h, 640).save(f'{OUT}/loopy-logo.png', optimize=True)
     for name in ('face', 'wave'):
-        logo.resize((320, int(logo.height * 320 / logo.width)), Image.LANCZOS).save(f'public/assets/loopy-{name}.png', optimize=True)
-    icon(logo, 512, 0.68).save('public/assets/icon-512.png', optimize=True)
-    icon(logo, 192, 0.68).save('public/assets/icon-192.png', optimize=True)
-    print('logo', logo.size)
+        fit(h, 300).save(f'{OUT}/loopy-{name}.png', optimize=True)
+    icon(h, 512, 0.7).save(f'{OUT}/icon-512.png', optimize=True)
+    icon(h, 192, 0.7).save(f'{OUT}/icon-192.png', optimize=True)
+    print('tam boy', full.size, 'baş', h.size)
