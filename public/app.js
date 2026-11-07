@@ -1,5 +1,5 @@
 // Üye ekranları ve yönlendirme. Ekran düzenleri LoopWear_Demo_2.html'den gelir; davranış MVP şartnamesine göredir.
-import { S, t, setLang, esc, api, post, errText, catName, matName, condName, colorName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, sheet, confirmSheet, pickSheet, qrSvg, compressPhoto, impactMetrics, methodSheet, notifText, name, LOOPY } from './core.js';
+import { S, t, setLang, esc, api, post, errText, catName, matName, condName, colorName, sizeName, stationName, activeStations, fmt, when, IC, statusPill, toast, confetti, pointsPop, countUp, notifTone, sheet, confirmSheet, pickSheet, qrSvg, compressPhoto, impactMetrics, methodSheet, notifText, name, LOOPY } from './core.js';
 import { renderAdmin } from './admin.js';
 
 const app = document.getElementById('app');
@@ -35,21 +35,13 @@ async function refreshUser() {
 
 // ---------- Kart ----------
 function itemCard(it) {
-  const locked = it.status === 'PENDING_DROP';
   return `<article class="pcard" data-open="${esc(it.id)}">
     <button class="fav-heart ${it.favorite ? 'on' : ''}" data-fav="${esc(it.id)}" aria-pressed="${it.favorite}" aria-label="${x('favorites')}">${IC.heart}</button>
-    ${locked && !it.mine ? `<button class="bell-btn ${it.subscribed ? 'on' : ''}" data-bell="${esc(it.id)}" aria-pressed="${it.subscribed}" aria-label="${x('notify_me')}">${IC.bell}</button>` : ''}
     <div class="prod-illustration">${it.photos[0] ? `<img loading="lazy" src="${esc(it.photos[0])}" alt="">` : ''}</div>
     <div class="pb"><div class="pn">${esc(catName(it.category))} · ${esc(sizeName(it.size))}</div><div class="pp">${fmt(it.point_value)} ${x('points')}</div>${statusPill(it.status)}</div>
   </article>`;
 }
 
-async function toggleBell(id, btn) {
-  const { subscribed } = await post(`/api/items/${id}/notify`);
-  btn.classList.toggle('on', subscribed);
-  btn.setAttribute('aria-pressed', subscribed);
-  toast(subscribed ? t('notify_on') : t('notify_off'));
-}
 async function toggleFav(id, btn) {
   const { favorite } = await post(`/api/items/${id}/favorite`);
   btn.classList.toggle('on', favorite);
@@ -186,7 +178,6 @@ async function itemDetail(id) {
   let foot = '';
   if (it.mine) foot = `<p class="center muted">${x('your_item')}</p>${waiting ? `<a class="btn" href="#/qr/drop/${esc(it.id)}">${x('show_drop_qr')}</a>` : ''}`;
   else if (ready) foot = `<div class="row between"><div><div style="font-weight:900;font-size:18px;color:var(--navy)">${fmt(it.point_value)} ${x('points')}</div><div style="font-size:11px;color:var(--text2)">${x('current_balance')}: ${fmt(u.wallet_balance)} ${x('points')}</div></div></div><a class="btn green" href="#/reserve/${esc(it.id)}">${x('want_it')}</a>`;
-  else if (waiting) foot = `<button class="btn line navy" data-bell-big="${esc(it.id)}" aria-pressed="${it.subscribed}">${IC.bell}${x(it.subscribed ? 'notify_on' : 'notify_me')}</button>`;
   else if (['PENDING_PICKUP', 'PICKUP_READY'].includes(it.status)) foot = `<p class="center muted">${x('not_for_you')}</p>`;
   screen(`${backbar('', `<button class="iconbtn" data-fav="${esc(it.id)}" aria-pressed="${it.favorite}" aria-label="${x('favorites')}"><span class="fav-heart ${it.favorite ? 'on' : ''}" style="position:static;background:none">${IC.heart}</span></button>`)}
     <div class="content bare" style="padding-top:6px">
@@ -229,28 +220,16 @@ async function reserve(id) {
     await post(`/api/items/${id}/reserve`);
     await refreshUser();
     S.wardrobeTab = 'reserved';
-    toast(t('reserved_toast'));
+    toast(t('reserved_toast'), 'success');
+    confetti(30);
     go('#/wardrobe');
-  } catch (e) { toast(errText(e)); itemDetail(id); }
+  } catch (e) { toast(errText(e), 'error'); itemDetail(id); }
 }
 
 // ---------- Bırak akışı ----------
-const STEPS = ['cap_consent', 'cap_photos', 'cap_info', 'cap_result', 'cap_station'];
+const STEPS = ['cap_consent', 'cap_photos', 'cap_info', 'cap_station'];
 const newDraft = () => ({ step: 1, consents: [false, false, false, false], category: '', condition: '', size: '', material: '', color: '', station_id: S.user?.default_station_id || activeStations()[0]?.id || '', photos: [null, null, null, null], client_key: crypto.randomUUID?.() || String(Date.now() + Math.random()) });
 const stepBar = (d) => `<div class="backbar"><button class="iconbtn" data-drop-back aria-label="${x('back')}">${IC.back}</button><span class="cap">${d.step} / ${STEPS.length} — ${x(STEPS[d.step - 1])}</span><span style="width:38px"></span></div>`;
-
-function pointParts(d) {
-  const c = S.catalog.categories.find((o) => o.id === d.category);
-  const k = S.catalog.conditions.find((o) => o.id === d.condition);
-  return { c, k, total: c && k ? Math.min(100, c.points + k.points) : null };
-}
-// Gösterim içindir; kesin değer kayıtta sunucudan gelir
-function liveImpact(d) {
-  const c = S.catalog.categories.find((o) => o.id === d.category);
-  const m = S.catalog.materials.find((o) => o.id === d.material);
-  if (!c || !m || m.co2 == null || S.catalog.closedSet?.has(`${c.id}|${m.id}`)) return { co2: null, water: null };
-  return { co2: c.weight * m.co2, water: c.weight * m.water };
-}
 
 function dropFlow() {
   const d = S.draft || (S.draft = newDraft());
@@ -266,7 +245,7 @@ function dropFlow() {
     const labels = ['ph_front', 'ph_back', 'ph_detail', 'ph_optional'];
     const ready = d.photos.slice(0, 3).every(Boolean);
     screen(`${stepBar(d)}<div class="content bare"><h1 class="page-title" style="font-size:22px">${x('photos_title')}</h1><p class="muted" style="margin-bottom:16px">${x('photos_body')}</p>
-      <div class="grid2">${labels.map((l, i) => `<label class="photoslot ${d.photos[i] ? 'filled' : ''}">${d.photos[i] ? `<img src="${d.photos[i]}" alt=""><span class="check"><span class="badge-check">${IC.check}</span></span><span class="lbl">${x(l)}</span><button class="rm" data-rm="${i}">${x('remove')}</button>` : `${IC.plus}<span>${x(l)}</span>`}<input type="file" accept="image/*" data-photo="${i}" aria-label="${x(l)}" ${d.photos[i] ? 'hidden' : ''}></label>`).join('')}</div>
+      <div class="grid2">${labels.map((l, i) => `<label class="photoslot ${d.photos[i] ? 'filled' : ''}">${d.photos[i] ? `<img src="${d.photos[i]}" alt=""><span class="ph-ok"><span class="badge-check">${IC.check}</span></span><span class="lbl">${x(l)}</span><button class="rm" data-rm="${i}">${x('remove')}</button>` : `${IC.plus}<span>${x(l)}</span>`}<input type="file" accept="image/*" data-photo="${i}" aria-label="${x(l)}" ${d.photos[i] ? 'hidden' : ''}></label>`).join('')}</div>
       <div class="card solid flat row gap12" style="background:#EEF2EC;margin-top:16px"><img src="${LOOPY.face}" class="mascot" style="width:46px;flex-shrink:0" alt=""><div><div style="font-size:11.5px;font-weight:800;color:var(--sage-dark)">${x('loopy_tip_head')}</div><div style="font-size:12.5px;font-weight:700">${x('loopy_tip')}</div></div></div>
       </div><div class="footer-bar">${ready ? '' : `<p class="center muted">${x('photos_missing')}</p>`}<button class="btn green" data-drop-next ${ready ? '' : 'disabled'}>${x('continue')}</button></div>`);
     return;
@@ -279,18 +258,7 @@ function dropFlow() {
       ${sel('category', t('d_category'), d.category && catName(d.category))}${sel('size', t('d_size'), d.size && sizeName(d.size))}${sel('material', t('d_material'), d.material && matName(d.material))}${sel('color', t('d_color'), d.color && colorName(d.color))}${sel('condition', t('d_condition'), d.condition && condName(d.condition))}
       ${cond ? `<p class="footnote" style="margin:-4px 0 12px">${esc(cond[`desc_${S.lang}`])}</p>` : ''}
       <p class="muted" style="display:flex;gap:6px;align-items:center">${IC.info}${x('brand_note')}</p></div>
-      <div class="footer-bar"><button class="btn green" data-drop-next ${ok ? '' : 'disabled'}>${x('see_points')}</button></div>`);
-    return;
-  }
-  if (d.step === 4) {
-    const { c, k, total } = pointParts(d);
-    const line = (ic, label, val) => `<div class="fin" style="padding:6px 0"><div class="row">${ic}<span style="font-size:13px;font-weight:700">${esc(label)}</span></div><span class="pill p-ready">+${val}</span></div>`;
-    screen(`${stepBar(d)}<div class="content bare center-col"><img src="${LOOPY.wave}" class="mascot" style="width:100px;margin:10px 0 14px" alt="">
-      <h1>${x('result_loopy')}</h1><p class="muted" style="margin-bottom:16px">${esc(catName(d.category))} · ${esc(condName(d.condition))}</p>
-      <div class="card solid flat" style="width:100%;background:#F5F1E6"><p class="muted" style="margin-bottom:4px">${x('live_points')}</p><div style="font-size:32px;font-weight:900;color:var(--navy)">${total} <span style="font-size:15px;color:var(--text2)">${x('points')}</span></div></div>
-      <div class="card" style="width:100%;text-align:left"><div style="font-weight:800;font-size:14px;margin-bottom:8px">${x('points_how')}</div>${line(IC.shirt, t('d_category'), c.points)}${line(IC.leaf, t('d_condition'), k.points)}</div>
-      <div style="width:100%;text-align:left"><h2 class="section-title" style="margin-top:0">${x('ref_title')}</h2>${impactMetrics(liveImpact(d))}<div style="margin-top:12px"><button class="link" data-method>${x('how_calc')}</button></div></div>
-      </div><div class="footer-bar"><button class="btn green" data-drop-next>${x('choose_station')}</button></div>`);
+      <div class="footer-bar"><button class="btn green" data-drop-next ${ok ? '' : 'disabled'}>${x('continue')}</button></div>`);
     return;
   }
   const stations = activeStations();
@@ -303,8 +271,8 @@ function dropFlow() {
 async function dropPick(key) {
   const d = S.draft; const c = S.catalog;
   const map = {
-    category: [t('d_category'), c.categories.map((o) => ({ value: o.id, label: name(o), right: `${o.points}` })), { search: t('search_category') }],
-    condition: [t('d_condition'), c.conditions.map((o) => ({ value: o.id, label: name(o), right: `+${o.points}` }))],
+    category: [t('d_category'), c.categories.map((o) => ({ value: o.id, label: name(o) })), { search: t('search_category') }],
+    condition: [t('d_condition'), c.conditions.map((o) => ({ value: o.id, label: name(o) }))],
     size: [t('d_size'), c.sizes.map((s) => ({ value: s, label: sizeName(s) }))],
     material: [t('d_material'), c.materials.map((o) => ({ value: o.id, label: name(o) }))],
     color: [t('d_color'), c.colors.map((o) => ({ value: o.id, label: name(o) }))],
@@ -318,23 +286,29 @@ async function dropPick(key) {
 async function publishDrop() {
   const d = S.draft;
   const started = Date.now();
-  screen(`<div class="backbar" style="justify-content:center">${wordmark(17)}</div><div class="content center-col" style="justify-content:center">
-    <h1 style="font-size:21px">${x('analyzing')}</h1>
-    <div class="card" style="width:100%;text-align:left;margin-top:16px">${['an_1', 'an_2', 'an_3'].map((k, i) => `<div class="checklist-row"><span style="font-weight:700;font-size:13.5px">${x(k)}</span><span data-an="${i}" class="${i ? 'idle' : 'spin'}"></span></div>`).join('')}</div>
-    <div class="progressbar"><div class="fill" id="anFill"></div></div></div>`);
+  const AN = ['an_1', 'an_2', 'an_3', 'an_4'];
+  const STEP_MS = 950;
+  screen(`<div class="backbar" style="justify-content:center">${wordmark(17)}</div><div class="content center-col ai-screen" style="justify-content:center">
+    <div class="ai-orb"><span class="ai-ring"></span><span class="ai-ring r2"></span><img src="${LOOPY.face}" alt=""></div>
+    <span class="ai-chip">LoopAI</span>
+    <h1 style="font-size:21px;margin-top:10px">${x('analyzing')}</h1>
+    <div class="card" style="width:100%;text-align:left;margin-top:16px">${AN.map((k, i) => `<div class="checklist-row"><span style="font-weight:700;font-size:13.5px">${x(k)}</span><span data-an="${i}" class="${i ? 'idle' : 'spin'}"></span></div>`).join('')}</div>
+    <div class="progressbar ai"><div class="fill" id="anFill"></div></div></div>`);
   const step = (i) => {
     const prev = document.querySelector(`[data-an="${i - 1}"]`);
     if (prev) { prev.className = 'badge-check'; prev.innerHTML = IC.check; }
     const cur = document.querySelector(`[data-an="${i}"]`);
     if (cur) cur.className = 'spin';
     const f = document.getElementById('anFill');
-    if (f) f.style.width = `${25 + i * 30}%`;
+    if (f) f.style.width = `${Math.min(100, 12 + i * 26)}%`;
   };
-  setTimeout(() => step(1), 500); setTimeout(() => step(2), 1000);
+  AN.forEach((_, i) => { if (i) setTimeout(() => step(i), i * STEP_MS); });
   try {
     const { item } = await post('/api/items', { category: d.category, material: d.material, size: d.size, condition: d.condition, color: d.color, station_id: d.station_id, consents: d.consents, photos: d.photos.filter(Boolean), client_key: d.client_key });
     await refreshUser();
-    await new Promise((r) => setTimeout(r, Math.max(0, 1500 - (Date.now() - started))));
+    await new Promise((r) => setTimeout(r, Math.max(0, AN.length * STEP_MS - (Date.now() - started))));
+    step(AN.length);
+    await new Promise((r) => setTimeout(r, 350));
     S.draft = null;
     S.lastDrop = item;
     go(`#/drop/result/${item.id}`);
@@ -351,10 +325,18 @@ async function dropResult(id) {
   screen(`<div class="content bare center-col" style="padding-top:calc(30px + var(--safe-t))">
     <img src="${LOOPY.hero}" class="mascot" style="width:170px;margin-bottom:10px" alt="Loopy">
     <h1>${x('result_loopy')}</h1><p class="muted" style="margin-bottom:16px">${x('result_note')}</p>
-    <div class="card solid flat" style="width:100%;background:#EEF2EC">${IC.checkLg}<div style="font-size:28px;font-weight:900;color:var(--sage-dark);margin-top:8px">${fmt(it.point_value)} ${x('points')}</div><div class="muted">${esc(catName(it.category))} · ${esc(condName(it.condition))}</div></div>
+    <div class="card solid flat earned">${IC.checkLg}<div class="muted" style="margin-top:6px">${x('earned')}</div><div class="earned-num"><span id="earnedNum">0</span> <span style="font-size:15px">${x('points')}</span></div><div class="muted">${esc(catName(it.category))} · ${esc(condName(it.condition))}</div></div>
     <div style="width:100%;text-align:left"><h2 class="section-title" style="margin-top:0">${x('ref_title')}</h2>${impactMetrics(it.impact)}<div class="fin" style="margin-top:10px"><span class="muted">${x('added_to_impact')}</span><button class="link" style="white-space:nowrap" data-method>${x('how_calc')}</button></div></div>
     <p class="footnote" style="width:100%;text-align:left">${x('drop_deadline', { station: stationName(it.station_id) })}</p>
     </div><div class="footer-bar"><a class="btn green" href="#/qr/drop/${esc(it.id)}">${x('create_code')}</a><a class="btn line" href="#/impact">${x('go_impact')}</a></div>`);
+  if (S.lastDrop?.id === id && !S.lastDrop.celebrated) {
+    S.lastDrop.celebrated = true;
+    pointsPop(it.point_value);
+    setTimeout(() => countUp(document.getElementById('earnedNum'), it.point_value), 350);
+  } else {
+    const n = document.getElementById('earnedNum');
+    if (n) n.textContent = fmt(it.point_value);
+  }
 }
 
 // ---------- QR ekranları ----------
@@ -439,7 +421,7 @@ async function returnFlow(id) {
   const reason = await sheet(`<h2>${x('start_return')}</h2><div class="field" style="margin:0"><label for="rr">${x('return_reason')}</label><textarea class="input" id="rr" maxlength="280"></textarea></div><button class="btn" data-ok>${x('send')}</button><button class="btn line navy" data-close>${x('cancel')}</button>`,
     (el, close) => el.querySelector('[data-ok]').addEventListener('click', () => { const v = el.querySelector('#rr').value.trim(); if (v) close(v); else el.querySelector('#rr').focus(); }));
   if (!reason) return;
-  try { await post('/api/returns', { reservation_id: id, reason }); toast(t('return_sent')); wardrobe(); } catch (e) { toast(errText(e)); }
+  try { await post('/api/returns', { reservation_id: id, reason }); toast(t('return_sent'), 'success'); wardrobe(); } catch (e) { toast(errText(e)); }
 }
 async function rateFlow(id) {
   let score = 0;
@@ -454,7 +436,7 @@ async function rateFlow(id) {
       el.querySelector('[data-ok]').addEventListener('click', () => close({ score, comment: el.querySelector('#rc').value }));
     });
   if (!data) return;
-  try { await post('/api/reviews', { reservation_id: id, ...data }); toast(t('thanks')); wardrobe(); } catch (e) { toast(errText(e)); }
+  try { await post('/api/reviews', { reservation_id: id, ...data }); toast(t('thanks'), 'success'); confetti(24); wardrobe(); } catch (e) { toast(errText(e)); }
 }
 
 // ---------- Etkim ----------
@@ -505,7 +487,7 @@ async function support() {
   f.addEventListener('submit', async (e) => {
     e.preventDefault();
     const err = f.querySelector('.err'); err.hidden = true;
-    try { await post('/api/support', { kind: 'support', message: f.querySelector('textarea').value }); toast(t('support_sent')); support(); } catch (ex) { err.textContent = errText(ex); err.hidden = false; }
+    try { await post('/api/support', { kind: 'support', message: f.querySelector('textarea').value }); toast(t('support_sent'), 'success'); support(); } catch (ex) { err.textContent = errText(ex); err.hidden = false; }
   });
   try {
     const { requests: r } = await api('/api/me/support');
@@ -517,7 +499,7 @@ async function notifications() {
   screen(`${titleBar(t('notifications'))}<div class="content bare" id="nt">${skeleton()}</div>`);
   try {
     const { notifications: n } = await api('/api/me/notifications');
-    document.getElementById('nt').innerHTML = n.length ? n.map((r) => `<div class="card ${r.read ? '' : 'solid flat'}" ${r.read ? '' : 'style="background:#EDF1EA"'} ${r.params?.item_id ? `data-open="${esc(r.params.item_id)}"` : ''}><p style="font-size:13.5px;font-weight:700">${esc(notifText(r))}</p><span class="muted" style="font-size:11.5px">${when(r.created_at)}</span></div>`).join('') : `<div class="card center"><p class="muted">${x('no_notifications')}</p></div>`;
+    document.getElementById('nt').innerHTML = n.length ? n.map((r) => `<div class="card notif n-${notifTone(r.kind)} ${r.read ? '' : 'unread'}" ${r.params?.item_id ? `data-open="${esc(r.params.item_id)}"` : ''}><p style="font-size:13.5px;font-weight:700">${esc(notifText(r))}</p><span class="muted" style="font-size:11.5px">${when(r.created_at)}</span></div>`).join('') : `<div class="card center"><p class="muted">${x('no_notifications')}</p></div>`;
     await post('/api/me/notifications/read');
     S.user.unread = 0;
   } catch { document.getElementById('nt').innerHTML = errorBox(); }
@@ -536,6 +518,7 @@ async function buyGift(btn) {
   try {
     const { id } = await post(`/api/gifts/${btn.dataset.gift}/buy`);
     await refreshUser();
+    confetti();
     go(`#/qr/gift/${id}`);
   } catch (e) { toast(errText(e)); }
 }
@@ -585,9 +568,7 @@ document.addEventListener('click', async (e) => {
       try { sessionStorage.setItem('lw_lang_set', '1'); } catch { /* önemsiz */ }
       if (S.user) api('/api/me', { method: 'PATCH', body: { lang: el.dataset.lang } }).catch(() => {});
       route();
-    } else if ((el = q('[data-bell]'))) { await toggleBell(el.dataset.bell, el); }
-    else if ((el = q('[data-bell-big]'))) { await post(`/api/items/${el.dataset.bellBig}/notify`); itemDetail(el.dataset.bellBig); }
-    else if ((el = q('[data-fav]'))) { await toggleFav(el.dataset.fav, el.querySelector('.fav-heart') || el); }
+    } else if ((el = q('[data-fav]'))) { await toggleFav(el.dataset.fav, el.querySelector('.fav-heart') || el); }
     else if ((el = q('[data-reserve]'))) { await reserve(el.dataset.reserve); }
     else if ((el = q('[data-open]'))) { go(`#/item/${el.dataset.open}`); }
     else if (q('[data-back]')) { history.back(); }
@@ -607,7 +588,7 @@ document.addEventListener('click', async (e) => {
     else if ((el = q('[data-rate]'))) { await rateFlow(el.dataset.rate); }
     else if ((el = q('[data-gift]'))) { await buyGift(el); }
     else if (q('[data-close-account]')) {
-      if (await confirmSheet(t('close_account'), t('close_account_body'), t('close_account_btn'), { danger: true })) { await post('/api/support', { kind: 'close_account' }); toast(t('support_sent')); support(); }
+      if (await confirmSheet(t('close_account'), t('close_account_body'), t('close_account_btn'), { danger: true })) { await post('/api/support', { kind: 'close_account' }); toast(t('support_sent'), 'success'); support(); }
     } else if (q('[data-logout]')) { await post('/api/auth/logout'); S.user = null; S.draft = null; go('#/'); }
   } catch (ex) { toast(errText(ex)); }
 });
@@ -630,7 +611,11 @@ setInterval(async () => {
     if (S.user && S.user.unread > before) {
       const { notifications: n } = await api('/api/me/notifications');
       const fresh = n.find((r) => !r.read);
-      if (fresh) toast(notifText(fresh));
+      if (fresh) {
+        const tone = notifTone(fresh.kind);
+        toast(notifText(fresh), tone);
+        if (tone === 'success') confetti(28);
+      }
       const b = document.querySelector('.iconbtn[href="#/notifications"]');
       if (b) b.innerHTML = `${IC.bell}<span class="dot">${S.user.unread}</span>`;
     }

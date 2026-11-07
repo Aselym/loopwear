@@ -34,7 +34,7 @@ function reasonSheet(title, presets, { extra = '', okLabel, danger } = {}) {
 }
 
 async function act(fn, reload = true) {
-  try { await fn(); toast(t('a_done')); } catch (e) { toast(errText(e)); }
+  try { await fn(); toast(t('a_done'), 'success'); } catch (e) { toast(errText(e), 'error'); }
   if (reload) renderAdmin(document.getElementById('app'), current.a, current.b);
 }
 let current = {};

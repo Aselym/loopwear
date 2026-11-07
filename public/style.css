@@ -117,7 +117,7 @@ h3{font-size:14px;font-weight:800}
 .photoslot.filled{border-style:solid;border-color:var(--sage-dark)}
 .photoslot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .photoslot input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.photoslot .check{position:absolute;top:8px;right:8px;z-index:2}
+.photoslot .ph-ok{position:absolute;top:8px;right:8px;z-index:2}
 .photoslot .lbl{position:absolute;left:8px;bottom:8px;background:rgba(255,253,248,.92);color:var(--text);border-radius:8px;padding:2px 8px;z-index:2}
 .photoslot .rm{position:absolute;top:8px;left:8px;background:rgba(255,253,248,.92);color:#B75B5B;border-radius:8px;padding:3px 8px;font-size:11.5px;font-weight:800;z-index:2}
 .field{margin-bottom:12px;display:flex;flex-direction:column}
@@ -185,6 +185,43 @@ textarea.input{min-height:80px;resize:vertical;font-weight:500}
 @keyframes fade{from{opacity:0}}
 @keyframes rise{from{transform:translateY(16px);opacity:0}}
 @keyframes toastrise{from{transform:translate(-50%,8px);opacity:0}}
+.toast{display:flex;align-items:center;gap:10px;text-align:left;animation:toastpop .45s cubic-bezier(.2,1.6,.4,1)}
+.toast .t-ic{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none;font-weight:900}
+.toast.t-success{background:linear-gradient(120deg,#2F7A52,#4FA36C 60%,#7FB38C)}
+.toast.t-error{background:linear-gradient(120deg,#B24E4E,#D47F7F)}
+.toast.t-info{background:linear-gradient(120deg,#2C3E4D,#3F5F86)}
+@keyframes toastpop{0%{transform:translate(-50%,24px) scale(.8);opacity:0}60%{transform:translate(-50%,-4px) scale(1.04);opacity:1}100%{transform:translate(-50%,0) scale(1)}}
+
+/* Konfeti ve puan patlaması */
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.confetti i{position:absolute;top:-16px;animation-name:confall;animation-timing-function:cubic-bezier(.25,.6,.45,1);animation-fill-mode:forwards}
+@keyframes confall{to{transform:translate(var(--dx),105vh) rotate(var(--r))}}
+.points-pop{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:61;pointer-events:none;display:grid;place-items:center;text-align:center;animation:ppop 2.1s cubic-bezier(.2,1.5,.4,1) forwards}
+.points-pop .pp-burst{position:absolute;width:190px;height:190px;border-radius:50%;background:radial-gradient(circle,#FFE49A 0,#F2A65A 45%,rgba(242,166,90,0) 70%);animation:burst 2.1s ease-out forwards}
+.points-pop .pp-num{position:relative;font-size:64px;font-weight:900;color:#fff;-webkit-text-stroke:2px #2F7A52;text-shadow:0 6px 0 #2F7A52,0 12px 24px rgba(47,122,82,.4);line-height:1}
+.points-pop .pp-unit{position:relative;margin-top:6px;font-size:15px;font-weight:900;color:#fff;background:#2F7A52;padding:4px 12px;border-radius:99px}
+@keyframes ppop{0%{transform:translate(-50%,-50%) scale(.2);opacity:0}18%{transform:translate(-50%,-50%) scale(1.15);opacity:1}30%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{transform:translate(-50%,-80%) scale(.9);opacity:0}}
+@keyframes burst{0%{transform:scale(.2);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.earned{width:100%;background:linear-gradient(135deg,#E6F2E8,#FFF4DC);border:2px solid #CFE6D3}
+.earned-num{font-size:34px;font-weight:900;color:#2F7A52;margin-top:2px;animation:numpop .6s .35s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes numpop{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+/* LoopAI hesaplama ekranı */
+.ai-orb{position:relative;width:120px;height:120px;display:grid;place-items:center}
+.ai-orb img{width:96px;position:relative;animation:bob 1.6s ease-in-out infinite}
+.ai-ring{position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#3F7254;border-right-color:#D47F7F;animation:spin 1.4s linear infinite}
+.ai-ring.r2{inset:-10px;border-top-color:#3F5F86;border-right-color:#E9B949;animation-duration:2.2s;animation-direction:reverse}
+.ai-chip{margin-top:14px;padding:5px 14px;border-radius:99px;font-weight:900;font-size:13px;color:#fff;background:linear-gradient(90deg,#3F7254,#3F5F86,#D47F7F);background-size:200% 100%;animation:shine 2s linear infinite}
+.progressbar.ai .fill{background:linear-gradient(90deg,#3F7254,#4FA36C,#E9B949,#D47F7F);background-size:200% 100%;animation:shine 1.6s linear infinite}
+@keyframes bob{50%{transform:translateY(-6px) rotate(-3deg)}}
+@keyframes shine{to{background-position:200% 0}}
+
+/* Bildirim kartları */
+.notif{border-left:5px solid var(--line)}
+.notif.n-success{border-left-color:#3F9A62}.notif.n-success.unread{background:#E6F2E8}
+.notif.n-error{border-left-color:#D47F7F}.notif.n-error.unread{background:#FBEAE7}
+.notif.n-info{border-left-color:#3F5F86}.notif.n-info.unread{background:#E8EEF6}
+@media (prefers-reduced-motion: reduce){.toast,.points-pop,.earned-num,.ai-orb img,.ai-ring,.ai-chip,.progressbar.ai .fill{animation:none}}
 
 /* Yönetici: demodaki görevli modu renkleri */
 .admin{display:flex;min-height:100dvh;flex-direction:column;background:#F4F1EA}

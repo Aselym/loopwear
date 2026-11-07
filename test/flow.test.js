@@ -79,7 +79,7 @@ test('K1: 4 onay ve en az 3 görsel olmadan kayıt olmaz', async () => {
   assert.equal((await u.post('/api/items', itemBody({ photos: [PX, PX, PX, PX] }))).status, 200);
 });
 
-test('K2: kayıt sonrası bekleyen ürün Keşfette görünür, rezerve edilemez, zil çalışır; puan ve QR anında', async () => {
+test('K2: onay bekleyen ürün Keşfette görünmez, rezerve edilemez, sahibi görür; puan ve QR anında', async () => {
   const u = await member(); const v = await member();
   const before = await balance(u);
   const { data } = await u.post('/api/items', itemBody());
@@ -87,10 +87,12 @@ test('K2: kayıt sonrası bekleyen ürün Keşfette görünür, rezerve edilemez
   assert.ok(data.item.drop_token.startsWith('LW-'));
   assert.equal(await balance(u), before + 80);
   const list = await v.get('/api/items');
-  assert.ok(list.data.items.some((i) => i.id === data.item.id));
+  assert.ok(!list.data.items.some((i) => i.id === data.item.id));
+  assert.equal((await v.get(`/api/items/${data.item.id}`)).status, 404);
   assert.equal((await v.post(`/api/items/${data.item.id}/reserve`)).data.error, 'not_available');
-  assert.equal((await v.post(`/api/items/${data.item.id}/notify`)).data.subscribed, true);
-  assert.equal((await v.post(`/api/items/${data.item.id}/notify`)).data.subscribed, false);
+  assert.equal((await u.get(`/api/items/${data.item.id}`)).data.item.status, 'PENDING_DROP');
+  const wardrobe = (await u.get('/api/me/wardrobe')).data;
+  assert.ok(JSON.stringify(wardrobe).includes(data.item.id));
 });
 
 test('K3: 24 saatte onaylanmazsa EXPIRED olur, Keşfetten kalkar, puan geri alınır', async () => {
@@ -345,7 +347,7 @@ test('stant: başlangıç puanı kıyafete yetmez, hediyeliğe yeter; görevli k
 
 test('arama Türkçe karakter ve büyük harfe duyarsızdır', async () => {
   const u = await member();
-  const a = (await u.post('/api/items', itemBody({ category: 'shirt' }))).data.item;
+  const a = await ready(u, { category: 'shirt' });
   const found = async (q) => (await u.get(`/api/items?q=${encodeURIComponent(q)}`)).data.items.some((i) => i.id === a.id);
   assert.ok(await found('göm'));
   assert.ok(await found('GOM'));

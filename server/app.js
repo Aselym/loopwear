@@ -73,7 +73,8 @@ async function itemsView(db, rows, userId) {
   });
 }
 
-const VISIBLE = "('PENDING_DROP','READY','PENDING_PICKUP','PICKUP_READY')";
+// Onay bekleyen ürün Keşfet'te görünmez; sahibi Dolabım'dan izler
+const VISIBLE = "('READY','PENDING_PICKUP','PICKUP_READY')";
 
 export function normalizeText(s) {
   return String(s || '').toLocaleLowerCase('tr').replace(/[çğıöşü]/g, (c) => ({ ç: 'c', ğ: 'g', ı: 'i', ö: 'o', ş: 's', ü: 'u' }[c])).normalize('NFD').replace(/[̀-ͯ]/g, '');

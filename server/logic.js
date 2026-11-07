@@ -86,7 +86,7 @@ export async function createItem(db, ownerId, input, opts = {}) {
     if (!m) throw new AppError('invalid_photo');
     const data = Buffer.from(m[2], 'base64');
     if (data.length > 3 * 1024 * 1024) throw new AppError('photo_too_large');
-    return { mime: m[1], data, sort_order: i, image_type: ['front', 'back', 'detail', 'optional'][i] };
+    return { mime: m[1], data, sort_order: i, image_type: ['front', 'back', 'detail', 'label'][i] };
   });
   return db.tx(async (t) => {
     if (client_key) {

@@ -82,13 +82,59 @@ export const IC = {
 export const STATUS_PILL = { PENDING_DROP: 'p-wait', READY: 'p-ready', PENDING_PICKUP: 'p-mid', PICKUP_READY: 'p-ready', COMPLETED: 'p-ready', RETURN_PENDING: 'p-info', EXPIRED: 'p-bad', REJECTED: 'p-bad', CANCELLED: 'p-bad', RETURNED: 'p-info' };
 export const statusPill = (st) => `<span class="pill ${STATUS_PILL[st] || 'p-info'}">${st === 'READY' ? IC.check : st === 'PENDING_DROP' ? IC.clock : ''}<span>${esc(t(`st_${st}`))}</span></span>`;
 
-export function toast(msg) {
+const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TOAST_IC = { success: '✓', error: '!', info: '•' };
+export function toast(msg, kind = 'info') {
   document.querySelector('.toast')?.remove();
   const el = document.createElement('div');
-  el.className = 'toast'; el.setAttribute('role', 'status'); el.textContent = msg;
+  el.className = `toast t-${kind}`; el.setAttribute('role', 'status');
+  el.innerHTML = `<span class="t-ic">${TOAST_IC[kind] || '•'}</span><span>${esc(msg)}</span>`;
   document.body.append(el);
-  setTimeout(() => el.remove(), 3200);
+  setTimeout(() => el.remove(), 3400);
 }
+
+const CONFETTI = ['#3F7254', '#D47F7F', '#3F5F86', '#E2C9A0', '#E9B949', '#7FB38C', '#F2A65A'];
+export function confetti(count = 46) {
+  if (reduced()) return;
+  const box = document.createElement('div');
+  box.className = 'confetti'; box.setAttribute('aria-hidden', 'true');
+  for (let i = 0; i < count; i += 1) {
+    const p = document.createElement('i');
+    const round = Math.random() < 0.35;
+    p.style.cssText = `left:${Math.random() * 100}%;background:${CONFETTI[i % CONFETTI.length]};width:${round ? 9 : 7}px;height:${round ? 9 : 13}px;border-radius:${round ? '50%' : '2px'};--dx:${(Math.random() - 0.5) * 160}px;--r:${Math.random() * 720 - 360}deg;animation-duration:${1.4 + Math.random() * 1.1}s;animation-delay:${Math.random() * 0.25}s`;
+    box.append(p);
+  }
+  document.body.append(box);
+  setTimeout(() => box.remove(), 2900);
+}
+
+// Kazanılan puan: ortada büyüyüp sönen rozet ve konfeti
+export function pointsPop(points) {
+  confetti();
+  const el = document.createElement('div');
+  el.className = 'points-pop'; el.setAttribute('role', 'status');
+  el.innerHTML = `<div class="pp-burst"></div><div class="pp-num">+${fmt(points)}</div><div class="pp-unit">${esc(t('points'))}</div>`;
+  document.body.append(el);
+  setTimeout(() => el.remove(), reduced() ? 1200 : 2100);
+}
+
+// Sayıyı sıfırdan hedefe sayar
+export function countUp(el, to, ms = 900) {
+  if (!el) return;
+  if (reduced()) { el.textContent = fmt(to); return; }
+  const start = performance.now();
+  const tick = (now) => {
+    const k = Math.min(1, (now - start) / ms);
+    el.textContent = fmt(Math.round(to * (1 - (1 - k) ** 3)));
+    if (k < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+
+// Bildirim türünün tonu: olumlu, olumsuz ya da bilgi
+const GOOD = new Set(['item_published', 'item_ready', 'drop_approved', 'pickup_ready', 'pickup_completed', 'return_approved', 'support_closed', 'item_corrected']);
+const BAD = new Set(['drop_rejected', 'drop_expired', 'pickup_rejected', 'pickup_expired', 'return_rejected']);
+export const notifTone = (kind) => (GOOD.has(kind) ? 'success' : BAD.has(kind) ? 'error' : 'info');
 
 // Alt panel; kapatıldığında çözülen söz döner
 export function sheet(html, onMount) {

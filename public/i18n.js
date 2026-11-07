@@ -109,6 +109,18 @@ Object.assign(DICT.tr, {
   confirm_title: 'Rezervasyonu Onayla', confirm_btn: 'Rezervasyonu Onayla', tab_reserved: 'Rezerve Ettiklerim', tab_acquired: 'Edindiklerim', tab_dropped: 'Bıraktıklarım', favorites_empty: 'Henüz favori ürünün yok.',
   how_built: 'Bu hesap nasıl oluşuyor?', how_built_1: 'Kategoriye göre ortalama ürün ağırlığı', how_built_2: 'Beyan edilen materyalin referans değeri', ref_total: 'Referans etki', account: 'Hesabım',
 });
+Object.assign(DICT.tr, {
+  analyzing: 'LoopAI kazandığın puanı hesaplıyor', an_1: 'Fotoğrafların ve bilgilerin alınıyor', an_2: 'Kategori ve kondisyon eşleştiriliyor', an_3: 'Referans etkin hesaplanıyor', an_4: 'Kazandığın puan hesaplanıyor',
+  earned: 'Kazandığın puan', ph_optional: 'Etiket (isteğe bağlı)', photos_body: 'Ön, arka ve detay fotoğrafı gerekli. İstersen kıyafetin etiketini de ekle. Fotoğraflar ürün sayfasında diğer üyelere gösterilir, kişisel bilgi içermemesine dikkat et.',
+  result_note: 'Puanın hesabına eklendi. Ürünün onaylandıktan sonra Keşfet’te görünecek.', n_item_published: '{cat} kaydedildi, {points} LoopPuan hesabına eklendi. Onaylanınca Keşfet’te görünecek.',
+  pending_note: 'Ürünün onay bekliyor. Onaylanınca Keşfet’te görünecek.',
+});
+Object.assign(DICT.en, {
+  analyzing: 'LoopAI is calculating your points', an_1: 'Reading your photos and details', an_2: 'Matching category and condition', an_3: 'Calculating your reference impact', an_4: 'Calculating the points you earn',
+  earned: 'Points you earned', ph_optional: 'Care label (optional)', photos_body: 'Front, back and detail photos are required. You can also add the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
+  result_note: 'Points added to your account. Your item appears on Discover once it’s approved.', n_item_published: '{cat} saved and {points} LoopPoints added to your account. It appears on Discover once approved.',
+  pending_note: 'Your item is awaiting approval. It appears on Discover once approved.',
+});
 Object.assign(DICT.en, {
   start: 'Start', notify_off: 'Notification off', impact_section: 'Impact summary', d_location: 'Location', d_status: 'Status',
   cap_consent: 'Conditions', cap_photos: 'Photos', cap_info: 'Item details', cap_result: 'Points and impact', cap_station: 'Station',
