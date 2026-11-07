@@ -545,7 +545,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   const json = (res, status, obj) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
 
   async function serveStatic(req, res, pathname) {
-    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : pathname === '/gizlilik' || pathname === '/privacy' ? 'gizlilik.html' : decodeURIComponent(pathname.slice(1));
+    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : pathname === '/gizlilik' || pathname === '/privacy' ? 'gizlilik.html' : pathname === '/deneme' || pathname === '/deneme/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
     const file = normalize(join(PUBLIC, rel));
     if (!file.startsWith(PUBLIC.replace(/[\\/]$/, '') + sep)) return json(res, 403, { error: 'forbidden' });
     try {
