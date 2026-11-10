@@ -20,7 +20,7 @@ const nav = (active) => `<nav class="bottomnav" aria-label="LoopWear">${NAV.map(
 const langSwitch = () => `<div class="lang" role="group" aria-label="${x('language')}"><button data-lang="tr" class="${S.lang === 'tr' ? 'on' : ''}">TR</button><button data-lang="en" class="${S.lang === 'en' ? 'on' : ''}">EN</button></div>`;
 const headerIcons = () => `<div class="row"><a class="iconbtn" href="#/notifications" aria-label="${x('notifications')}">${IC.bell}${S.user?.unread ? `<span class="dot">${S.user.unread}</span>` : ''}</a><a class="iconbtn" href="#/profile" aria-label="${x('profile')}">${IC.user}</a></div>`;
 const backbar = (middle = '', right = '<span style="width:38px"></span>', backAttr = 'data-back') => `<div class="backbar"><button class="iconbtn" ${backAttr} aria-label="${x('back')}">${IC.back}</button>${middle}${right}</div>`;
-// /cop31 adresinde Başla düğmesi kayıt formu olmadan doğrudan uygulamayı açar
+// /cop31 adresinde Hesap oluştur ve Giriş yap, form açmadan doğrudan uygulamaya geçirir
 const DIRECT = location.pathname.replace(/\/$/, '') === '/cop31';
 const installed = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
 const titleBar = (title) => backbar(`<span style="font-weight:900;font-size:16px">${esc(title)}</span>`);
@@ -57,7 +57,7 @@ function splash() {
       <img src="${LOOPY.hero}" class="mascot" style="width:180px;margin-bottom:18px" alt="Loopy">
       ${wordmark(32)}<p class="muted" style="font-size:14px;max-width:260px;margin-top:8px">${x('tagline')}</p>
     </div>
-    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))">${DIRECT ? `<button class="btn" data-guest>${x('start')}</button>` : `<a class="btn" href="#/start">${x('start')}</a>`}${installed || DIRECT ? '' : `<a class="btn line navy" href="/indir">${x('install_app')}</a>`}</div>`);
+    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))"><a class="btn" href="#/start">${x('start')}</a>${installed || DIRECT ? '' : `<a class="btn line navy" href="/indir">${x('install_app')}</a>`}</div>`);
 }
 function onboarding() {
   screen(`<div class="content center-col" style="justify-content:center;padding-bottom:0">
@@ -65,7 +65,7 @@ function onboarding() {
       <h1 class="page-title" style="font-size:22px">${x('tagline')}</h1>
       <p class="muted" style="max-width:280px">${x('intro')}</p>
     </div>
-    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))"><a class="btn" href="#/register">${x('create_account')}</a><a class="btn line navy" href="#/login">${x('log_in')}</a></div>`);
+    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))">${DIRECT ? `<button class="btn" data-guest>${x('create_account')}</button><button class="btn line navy" data-guest>${x('log_in')}</button>` : `<a class="btn" href="#/register">${x('create_account')}</a><a class="btn line navy" href="#/login">${x('log_in')}</a>`}</div>`);
 }
 
 function authForm(mode) {
@@ -612,6 +612,7 @@ async function route() {
   document.getElementById('overlay').innerHTML = '';
   if (window.__stopScanner) window.__stopScanner();
   if (!S.user) {
+    if (DIRECT && ['login', 'register'].includes(head)) return onboarding();
     if (head === 'login') return authForm('login');
     if (head === 'register') return authForm('register');
     if (head === 'start') return onboarding();
@@ -651,8 +652,8 @@ document.addEventListener('click', async (e) => {
     else if (q('[data-method]')) { methodSheet(); }
     else if (q('[data-tour]')) { tour(); }
     else if ((el = q('[data-guest]'))) {
-      el.disabled = true;
-      try { const { user } = await post('/api/auth/guest', { lang: S.lang }); S.user = user; if (location.hash === '#/') route(); else go('#/'); } finally { el.disabled = false; }
+      document.querySelectorAll('[data-guest]').forEach((b) => { b.disabled = true; });
+      try { const { user } = await post('/api/auth/guest', { lang: S.lang }); S.user = user; if (location.hash === '#/') route(); else go('#/'); } finally { document.querySelectorAll('[data-guest]').forEach((b) => { b.disabled = false; }); }
     }
     else if ((el = q('[data-filter]'))) { await filterAction(el.dataset.filter); }
     else if ((el = q('[data-consent]'))) { const i = Number(el.dataset.consent); S.draft.consents[i] = !S.draft.consents[i]; dropFlow(); }
