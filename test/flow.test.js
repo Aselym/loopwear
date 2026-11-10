@@ -409,3 +409,20 @@ test('tanıtım turu: yeni üyede görülmemiş gelir, görüldü işaretlenince
   await u.call('PATCH', '/api/me', { tour_seen: false });
   assert.equal((await u.get('/api/me')).data.user.tour_seen, true);
 });
+
+test('/cop31: kayıt formu olmadan her ziyaretçiye ayrı hesap açılır', async () => {
+  const a = new Client(); const b = new Client();
+  assert.equal((await a.get('/cop31')).status, 200);
+  const ua = (await a.post('/api/auth/guest', { lang: 'tr' })).data.user;
+  const ub = (await b.post('/api/auth/guest', { lang: 'en' })).data.user;
+  assert.notEqual(ua.id, ub.id);
+  assert.equal(ua.guest, true);
+  assert.equal(ua.display_name, 'Misafir');
+  assert.equal(ub.display_name, 'Guest');
+  assert.equal(ua.wallet_balance, 20);
+  assert.equal(ua.tour_seen, false);
+  assert.equal((await a.get('/api/me')).data.user.id, ua.id);
+  assert.equal((await a.get('/api/items')).status, 200);
+  const u = await member();
+  assert.equal((await u.get('/api/me')).data.user.guest, false);
+});

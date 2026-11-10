@@ -126,7 +126,7 @@ function matchesSearch(item, q) {
 
 async function userView(db, u) {
   const [{ n }] = await db.q('SELECT count(*)::int AS n FROM notifications WHERE user_id=$1 AND NOT read', [u.id]);
-  return { id: u.id, email: u.email, display_name: u.display_name, role: u.role, default_station_id: u.default_station_id, wallet_balance: u.wallet_balance, public_code: u.public_code, lang: u.lang, tour_seen: !!u.tour_seen, unread: n };
+  return { id: u.id, email: u.email, display_name: u.display_name, role: u.role, default_station_id: u.default_station_id, wallet_balance: u.wallet_balance, public_code: u.public_code, lang: u.lang, tour_seen: !!u.tour_seen, guest: !!u.is_guest, unread: n };
 }
 
 // ---------- Yönlendirme ----------
@@ -179,6 +179,26 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
       if (/unique|duplicate/i.test(e.message)) throw new AppError('email_taken', 409);
       throw e;
     }
+    await startSession(res, id);
+    const [u] = await db.q('SELECT * FROM users WHERE id=$1', [id]);
+    return { user: await userView(db, u) };
+  });
+
+  // /cop31 adresi: kayıt formu olmadan, her ziyaretçiye kendi hesabı açılır
+  route('POST', '/api/auth/guest', pub, async ({ body, res, ip }) => {
+    if (limited(`guest:${ip}`, 120)) throw new AppError('too_many', 429);
+    const s = await L.getSettings(db);
+    const id = newId();
+    const lang = body.lang === 'en' ? 'en' : 'tr';
+    const hash = await hashPassword(randomBytes(24).toString('base64url'));
+    const [st] = await db.q('SELECT id FROM stations WHERE active ORDER BY sort_order LIMIT 1');
+    await db.tx(async (t) => {
+      await t.q('INSERT INTO users (id, email, password_hash, display_name, default_station_id, public_code, lang, is_guest) VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)',
+        [id, `misafir-${id.toLowerCase()}@loopwear.invalid`, hash, lang === 'en' ? 'Guest' : 'Misafir', st?.id || null, `UQ-${randomBytes(12).toString('base64url')}`, lang]);
+      const pts = Number(s.starter_points) || 0;
+      if (pts > 0) await L.moveWallet(t, id, pts, 'STARTER', { reason: 'starter_points' });
+      await L.audit(t, id, 'user', id, 'register', null, 'guest', null);
+    });
     await startSession(res, id);
     const [u] = await db.q('SELECT * FROM users WHERE id=$1', [id]);
     return { user: await userView(db, u) };
@@ -565,7 +585,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   const json = (res, status, obj) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(obj)); };
 
   async function serveStatic(req, res, pathname) {
-    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : pathname === '/gizlilik' || pathname === '/privacy' ? 'gizlilik.html' : pathname === '/deneme' || pathname === '/deneme/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
+    const rel = pathname === '/' ? 'index.html' : pathname === '/indir' || pathname === '/get' ? 'indir.html' : pathname === '/ekran' ? 'ekran.html' : pathname === '/gizlilik' || pathname === '/privacy' ? 'gizlilik.html' : pathname === '/deneme' || pathname === '/deneme/' || pathname === '/cop31' || pathname === '/cop31/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
     const file = normalize(join(PUBLIC, rel));
     if (!file.startsWith(PUBLIC.replace(/[\\/]$/, '') + sep)) return json(res, 403, { error: 'forbidden' });
     try {

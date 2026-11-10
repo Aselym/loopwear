@@ -20,6 +20,8 @@ const nav = (active) => `<nav class="bottomnav" aria-label="LoopWear">${NAV.map(
 const langSwitch = () => `<div class="lang" role="group" aria-label="${x('language')}"><button data-lang="tr" class="${S.lang === 'tr' ? 'on' : ''}">TR</button><button data-lang="en" class="${S.lang === 'en' ? 'on' : ''}">EN</button></div>`;
 const headerIcons = () => `<div class="row"><a class="iconbtn" href="#/notifications" aria-label="${x('notifications')}">${IC.bell}${S.user?.unread ? `<span class="dot">${S.user.unread}</span>` : ''}</a><a class="iconbtn" href="#/profile" aria-label="${x('profile')}">${IC.user}</a></div>`;
 const backbar = (middle = '', right = '<span style="width:38px"></span>', backAttr = 'data-back') => `<div class="backbar"><button class="iconbtn" ${backAttr} aria-label="${x('back')}">${IC.back}</button>${middle}${right}</div>`;
+// /cop31 adresinde Başla düğmesi kayıt formu olmadan doğrudan uygulamayı açar
+const DIRECT = location.pathname.replace(/\/$/, '') === '/cop31';
 const installed = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
 const titleBar = (title) => backbar(`<span style="font-weight:900;font-size:16px">${esc(title)}</span>`);
 const errorBox = () => `<div class="card center stack"><p class="muted">${x('load_error')}</p><button class="btn line" data-retry>${x('retry')}</button></div>`;
@@ -55,7 +57,7 @@ function splash() {
       <img src="${LOOPY.hero}" class="mascot" style="width:180px;margin-bottom:18px" alt="Loopy">
       ${wordmark(32)}<p class="muted" style="font-size:14px;max-width:260px;margin-top:8px">${x('tagline')}</p>
     </div>
-    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))"><a class="btn" href="#/start">${x('start')}</a>${installed ? '' : `<a class="btn line navy" href="/indir">${x('install_app')}</a>`}</div>`);
+    <div class="stack" style="padding:20px 20px calc(36px + var(--safe-b))">${DIRECT ? `<button class="btn" data-guest>${x('start')}</button>` : `<a class="btn" href="#/start">${x('start')}</a>`}${installed || DIRECT ? '' : `<a class="btn line navy" href="/indir">${x('install_app')}</a>`}</div>`);
 }
 function onboarding() {
   screen(`<div class="content center-col" style="justify-content:center;padding-bottom:0">
@@ -509,7 +511,7 @@ async function profile() {
   const row = (icon, label, href, sub) => `<a class="pr-row" href="${href}"><span class="row gap12"><span class="pr-ic">${icon}</span><span><span style="display:block;font-weight:700;font-size:13.5px">${esc(label)}</span>${sub ? `<span class="muted" style="font-size:11px">${esc(sub)}</span>` : ''}</span></span>${IC.chevronRight}</a>`;
   const div = '<div class="divider" style="margin:0"></div>';
   screen(`${titleBar(t('profile'))}<div class="content bare">
-    <div class="row gap16" style="margin-bottom:18px"><div style="width:66px;height:66px;border-radius:50%;background:#E7DFD0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;color:var(--navy)">${IC.userLg}</div><div><div style="font-weight:900;font-size:18px">${esc(u.display_name)}</div><div class="muted">${esc(u.email)}</div></div></div>
+    <div class="row gap16" style="margin-bottom:18px"><div style="width:66px;height:66px;border-radius:50%;background:#E7DFD0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;color:var(--navy)">${IC.userLg}</div><div><div style="font-weight:900;font-size:18px">${esc(u.display_name)}</div>${u.guest ? '' : `<div class="muted">${esc(u.email)}</div>`}</div></div>
     <a class="card solid flat row between" href="#/wallet" style="background:#F1F4F0;text-decoration:none"><div><div style="font-size:26px;font-weight:900;color:var(--sage-dark)">${fmt(u.wallet_balance)} <span style="font-size:13px;color:var(--text2);font-weight:700">${x('points')}</span></div><p class="muted">${x('wallet_note')}</p></div><div style="width:40px;height:40px;border-radius:50%;background:#F8E6E6;display:flex;align-items:center;justify-content:center;color:var(--coral);flex:none">${IC.bars}</div></a>
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
@@ -648,6 +650,10 @@ document.addEventListener('click', async (e) => {
     else if (q('[data-retry]')) { route(); }
     else if (q('[data-method]')) { methodSheet(); }
     else if (q('[data-tour]')) { tour(); }
+    else if ((el = q('[data-guest]'))) {
+      el.disabled = true;
+      try { const { user } = await post('/api/auth/guest', { lang: S.lang }); S.user = user; if (location.hash === '#/') route(); else go('#/'); } finally { el.disabled = false; }
+    }
     else if ((el = q('[data-filter]'))) { await filterAction(el.dataset.filter); }
     else if ((el = q('[data-consent]'))) { const i = Number(el.dataset.consent); S.draft.consents[i] = !S.draft.consents[i]; dropFlow(); }
     else if (q('[data-drop-back]')) { if (S.draft.step > 1) { S.draft.step -= 1; dropFlow(); } else { S.draft = null; go('#/'); } }
