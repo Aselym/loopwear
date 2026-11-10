@@ -286,7 +286,7 @@ function dropFlow() {
   if (d.step === 1) {
     const all = d.consents.every(Boolean);
     screen(`${stepBar(d)}<div class="content bare"><h1 class="page-title" style="font-size:22px">${x('consent_title')}</h1><p class="muted" style="margin-bottom:16px">${x('consent_body')}</p>
-      ${d.consents.map((on, i) => `<button class="toggle-row" role="switch" aria-checked="${on}" data-consent="${i}"><span class="label">${x(`consent_${i + 1}`)}</span><span class="switch ${on ? 'on' : ''}"><span class="knob"></span></span></button>`).join('')}
+      ${d.consents.map((on, i) => `<button class="consent${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" data-consent="${i}"><span class="consent-box">${IC.check}</span><span class="consent-label">${x(`consent_${i + 1}`)}</span></button>`).join('')}
       ${all ? '' : `<p class="muted" style="display:flex;gap:6px;align-items:center">${IC.info}${x('consent_missing')}</p>`}</div>
       <div class="footer-bar"><button class="btn green" data-drop-next ${all ? '' : 'disabled'}>${x('continue')}</button></div>`);
     return;

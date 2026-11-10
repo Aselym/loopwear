@@ -133,6 +133,20 @@ Object.assign(DICT.tr, {
   e_title_required: 'Başlık yaz.', e_invalid_url: 'Bağlantı https:// ile başlamalı.', e_body_or_url: 'Bir haber bağlantısı ya da yazı metni ekle.',
 });
 Object.assign(DICT.tr, {
+  consent_title: 'Önce birkaç onay', consent_body: 'Ürünlerin sağlıklı ve güvenli şekilde yeniden kullanılması için aşağıdaki koşulların hepsini onaylaman gerekiyor.',
+  consent_1: 'Ürün bana ait veya başkası adına vermeye yetkiliyim.',
+  consent_2: 'Ürün temiz, yıkanmış ve yeniden kullanıma hazır.',
+  consent_3: 'Üründe yırtık, delik, belirgin leke veya kullanımı engelleyen bir kusur yok.',
+  consent_4: 'İç çamaşırı veya çorap değil; ceplerinde kişisel eşya yok ve ürün beyanımın doğru olduğunu onaylıyorum.',
+});
+Object.assign(DICT.en, {
+  consent_title: 'A few confirmations first', consent_body: 'To keep reused clothes healthy and safe, you need to confirm all of the conditions below.',
+  consent_1: 'The item is mine, or I’m allowed to give it on someone’s behalf.',
+  consent_2: 'The item is clean, washed and ready to be worn again.',
+  consent_3: 'It has no tears, holes, obvious stains or defects that prevent use.',
+  consent_4: 'It isn’t underwear or socks; the pockets are empty and I confirm my item details are accurate.',
+});
+Object.assign(DICT.tr, {
   tour_skip: 'Geç', tour_next: 'İleri', tour_back: 'Geri', tour_done: 'Başlayalım', tour_replay: 'Uygulama turu', tour_patch: 'hesabına eklenir', tour_water: 'Su',
   tour_t1: 'Merhaba, ben Loopy!', tour_b1: 'Dolabında bekleyen kıyafetlere yeni bir hayat veriyoruz. Giymediğini bırak, LoopPuan kazan, puanınla başka bir parça al.',
   tour_t2: 'Kıyafetini bırak', tour_b2: 'Alttaki menünün ortasındaki Bırak düğmesine dokun. Koşulları onayla, kıyafetinin fotoğraflarını çek, bilgilerini gir ve istasyonunu seç.',
