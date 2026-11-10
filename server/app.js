@@ -55,6 +55,19 @@ export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPass
     }
     await db.q("INSERT INTO settings (key, value) VALUES ('blog_seed','1') ON CONFLICT (key) DO NOTHING");
   }
+  // Zirve başladıktan sonra eklenen ikinci haber grubu; aynı adres ikinci kez eklenmez
+  const [blogSeeded2] = await db.q("SELECT 1 FROM settings WHERE key='blog_seed2'");
+  if (!blogSeeded2) {
+    const posts = JSON.parse(readFileSync(new URL('./blog_seed2.json', import.meta.url), 'utf8'));
+    for (const p of posts) {
+      const [dup] = await db.q('SELECT 1 FROM blog_posts WHERE url=$1', [p.url]);
+      if (!dup) {
+        await db.q('INSERT INTO blog_posts (id, lang, title, source, url, summary_tr, summary_en, published_on) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+          [newId(), p.lang, p.title, p.source, p.url, p.summary_tr, p.summary_en, p.published_on]);
+      }
+    }
+    await db.q("INSERT INTO settings (key, value) VALUES ('blog_seed2','1') ON CONFLICT (key) DO NOTHING");
+  }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
   if (!g) await db.q("INSERT INTO gifts (id, name_tr, name_en, points, stock) VALUES ($1,'LoopWear anahtarlık','LoopWear keychain',20,0)", [newId()]);
@@ -113,7 +126,7 @@ function matchesSearch(item, q) {
 
 async function userView(db, u) {
   const [{ n }] = await db.q('SELECT count(*)::int AS n FROM notifications WHERE user_id=$1 AND NOT read', [u.id]);
-  return { id: u.id, email: u.email, display_name: u.display_name, role: u.role, default_station_id: u.default_station_id, wallet_balance: u.wallet_balance, public_code: u.public_code, lang: u.lang, unread: n };
+  return { id: u.id, email: u.email, display_name: u.display_name, role: u.role, default_station_id: u.default_station_id, wallet_balance: u.wallet_balance, public_code: u.public_code, lang: u.lang, tour_seen: !!u.tour_seen, unread: n };
 }
 
 // ---------- Yönlendirme ----------
@@ -195,6 +208,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
       await db.q('UPDATE users SET display_name=$2 WHERE id=$1', [user.id, n]);
     }
     if (body.lang === 'tr' || body.lang === 'en') await db.q('UPDATE users SET lang=$2 WHERE id=$1', [user.id, body.lang]);
+    if (body.tour_seen === true) await db.q('UPDATE users SET tour_seen=TRUE WHERE id=$1', [user.id]);
     if (body.default_station_id) {
       const [st] = await db.q('SELECT id FROM stations WHERE id=$1 AND active', [body.default_station_id]);
       if (!st) throw new AppError('invalid_station');

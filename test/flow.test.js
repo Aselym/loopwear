@@ -366,7 +366,7 @@ test('Boğaziçi istasyonları COP31 ile birlikte açık; panelden kapatılan ye
 test('iklim gündemi: seçilmiş haberler hazır; yönetici ekler ve kaldırır, üye ekleyemez', async () => {
   const pub = new Client();
   const list = (await pub.get('/api/blog')).data.posts;
-  assert.equal(list.length, 11);
+  assert.equal(list.length, 17);
   assert.ok(list.every((p) => p.url.startsWith('https://') && p.summary_tr && p.summary_en));
   assert.ok(list[0].published_on >= list[list.length - 1].published_on);
   const u = await member();
@@ -374,7 +374,7 @@ test('iklim gündemi: seçilmiş haberler hazır; yönetici ekler ve kaldırır,
   assert.equal((await admin.post('/api/admin/blog', { title: '', url: 'https://example.com' })).data.error, 'title_required');
   assert.equal((await admin.post('/api/admin/blog', { title: 'x', url: 'javascript:alert(1)' })).data.error, 'invalid_url');
   assert.equal((await admin.post('/api/admin/blog', { title: 'x' })).data.error, 'body_or_url');
-  const own = await admin.post('/api/admin/blog', { title: 'Kampüste LoopWear standı', body: 'Bugün kampüsteydik.', image: PX, published_on: '2026-11-08' });
+  const own = await admin.post('/api/admin/blog', { title: 'Kampüste LoopWear standı', body: 'Bugün kampüsteydik.', image: PX, published_on: '2026-11-30' });
   assert.equal(own.status, 200);
   const one = (await pub.get(`/api/blog/${own.data.id}`)).data.post;
   assert.equal(one.body, 'Bugün kampüsteydik.');
@@ -383,7 +383,7 @@ test('iklim gündemi: seçilmiş haberler hazır; yönetici ekler ve kaldırır,
   assert.equal((await admin.post(`/api/admin/blog/${own.data.id}/delete`)).status, 200);
   assert.equal((await pub.get(`/api/blog/${own.data.id}`)).status, 404);
   await seed(db, { adminEmail: 'admin@example.com', adminPassword: 'adminparola1' });
-  assert.equal((await pub.get('/api/blog')).data.posts.length, 11);
+  assert.equal((await pub.get('/api/blog')).data.posts.length, 17);
 });
 
 test('yönetici Keşfet’teki onaylı ilanı gerekçeyle kaldırır, sahibine bildirim gider', async () => {
@@ -399,4 +399,13 @@ test('yönetici Keşfet’teki onaylı ilanı gerekçeyle kaldırır, sahibine b
   const notes = (await u.get('/api/me/notifications')).data.notifications;
   assert.ok(notes.some((n) => n.kind === 'item_removed' && n.params.reason === 'Ürün artık istasyonda yok'));
   assert.equal((await admin.post(`/api/admin/items/${item.id}/remove`, { reason: 'tekrar' })).status, 409);
+});
+
+test('tanıtım turu: yeni üyede görülmemiş gelir, görüldü işaretlenince kalıcı olur', async () => {
+  const u = await member();
+  assert.equal((await u.get('/api/me')).data.user.tour_seen, false);
+  await u.call('PATCH', '/api/me', { tour_seen: true });
+  assert.equal((await u.get('/api/me')).data.user.tour_seen, true);
+  await u.call('PATCH', '/api/me', { tour_seen: false });
+  assert.equal((await u.get('/api/me')).data.user.tour_seen, true);
 });

@@ -94,11 +94,57 @@ function authForm(mode) {
   });
 }
 
+// ---------- Tanıtım turu ----------
+// İlk girişte bir kez açılır; Profil'den yeniden izlenebilir. Karta dokunmak bir sonraki sayfaya geçirir.
+const TOUR_ART = [
+  () => `<img src="${LOOPY.hero}" class="tour-loopy big" alt="">`,
+  () => `<img src="${LOOPY.hero}" class="tour-loopy" alt=""><div class="tour-slots">${[IC.shirt, IC.shirt, IC.shirt, IC.doc].map((ic, i) => `<span class="tour-slot${i < 2 ? ' ok' : ''}">${ic}</span>`).join('')}</div>`,
+  () => `<img src="${LOOPY.face}" class="tour-head" alt=""><div class="tour-patch"><span class="tour-patch-ic">${IC.loop}</span><span><b>LoopPuan</b><i>${x('tour_patch')}</i></span></div>`,
+  () => `<div class="tour-prod"><span class="tour-prod-img">${IC.shirt}<span class="tour-heart">${IC.heart2}</span></span><span class="tour-prod-line"></span><span class="tour-prod-line short"></span></div><img src="${LOOPY.hero}" class="tour-loopy" alt="">`,
+  () => `<img src="${LOOPY.hero}" class="tour-loopy" alt=""><div class="tour-stats"><span class="tour-stat co2">${IC.cloud}<b>CO₂</b></span><span class="tour-stat water">${IC.drop}<b>${x('tour_water')}</b></span><span class="tour-stat news">${IC.leaf}<b>${x('blog_title')}</b></span></div>`,
+];
+function tour() {
+  const ov = document.getElementById('overlay');
+  if (ov.querySelector('.tour')) return;
+  const N = TOUR_ART.length; let i = 0;
+  const scrim = document.createElement('div');
+  scrim.className = 'scrim tour';
+  const done = () => {
+    scrim.remove(); document.removeEventListener('keydown', onKey);
+    if (S.user && !S.user.tour_seen) { S.user.tour_seen = true; api('/api/me', { method: 'PATCH', body: { tour_seen: true } }).catch(() => {}); }
+  };
+  const step = (d) => { const n = i + d; if (n >= N) { done(); return; } if (n < 0) return; i = n; draw(); };
+  const onKey = (e) => {
+    if (!scrim.isConnected) { document.removeEventListener('keydown', onKey); return; }
+    if (e.key === 'Escape') done(); else if (e.key === 'ArrowRight') step(1); else if (e.key === 'ArrowLeft') step(-1);
+  };
+  function draw() {
+    const last = i === N - 1;
+    scrim.innerHTML = `<div class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+      <div class="tour-top"><span class="tour-count">${i + 1} / ${N}</span><button class="tour-skip" data-tour-skip>${x(last ? 'close' : 'tour_skip')}</button></div>
+      <div class="tour-art a${i + 1}">${TOUR_ART[i]()}</div>
+      <div class="tour-text"><h2 id="tourTitle">${x(`tour_t${i + 1}`)}</h2><p>${x(`tour_b${i + 1}`)}</p></div>
+      <div class="tour-dots" aria-hidden="true">${TOUR_ART.map((_, k) => `<span class="${k === i ? 'on' : ''}"></span>`).join('')}</div>
+      <div class="tour-actions">${i ? `<button class="btn line navy" data-tour-back>${x('tour_back')}</button>` : ''}<button class="btn" data-tour-next>${x(last ? 'tour_done' : 'tour_next')}</button></div>
+    </div>`;
+    scrim.querySelector('[data-tour-next]').focus({ preventScroll: true });
+  }
+  scrim.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (e.target.closest('[data-tour-skip]')) done();
+    else if (e.target.closest('[data-tour-back]')) step(-1);
+    else if (e.target.closest('.tour-card')) step(1); // karta dokunmak ilerletir
+  });
+  document.addEventListener('keydown', onKey);
+  draw(); ov.append(scrim);
+}
+
 // ---------- Ana sayfa ----------
 const pointsCard = (u) => `<a class="card solid flat row between" href="#/wallet" style="background:linear-gradient(120deg,#F1F4F0,#F7F3E9);text-decoration:none"><div class="row gap12"><div style="width:38px;height:38px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;flex:none">${IC.loop}</div><div><div style="font-size:20px;font-weight:900;color:var(--navy)">${fmt(u.wallet_balance)} <span style="font-size:13px;font-weight:700;color:var(--text2)">${x('points')}</span></div><div style="font-size:11px;color:var(--text2)">${x('wallet_note')}</div></div></div></a>`;
 
 async function home() {
   const u = S.user;
+  if (u.role !== 'admin' && !u.tour_seen) tour();
   screen(`<div class="content">
     <div class="row between" style="margin-bottom:18px"><div><div style="font-size:19px;font-weight:900">${x('hello', { name: u.display_name })}</div></div>${headerIcons()}</div>
     ${pointsCard(u)}
@@ -468,7 +514,7 @@ async function profile() {
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
     <h2 class="section-title">LoopWear</h2>
-    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${installed ? '' : `${row(IC.doc, t('install_app'), '/indir')}${div}`}${row(IC.leaf, t('blog_title'), '#/blog')}${div}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
+    <div class="card">${row(IC.pin, t('stations_nav'), '#/stations')}${div}${installed ? '' : `${row(IC.doc, t('install_app'), '/indir')}${div}`}${row(IC.leaf, t('blog_title'), '#/blog')}${div}<button class="pr-row" data-tour><span class="row gap12"><span class="pr-ic">${IC.star}</span><span style="font-weight:700;font-size:13.5px">${x('tour_replay')}</span></span>${IC.chevronRight}</button>${div}${row(IC.bell, t('support'), '#/support')}${div}${row(IC.shield, t('privacy'), '/gizlilik')}${div}<button class="pr-row" data-method><span class="row gap12"><span class="pr-ic">${IC.doc}</span><span style="font-weight:700;font-size:13.5px">${x('methodology')}</span></span>${IC.chevronRight}</button>${div}<div class="pr-row" style="cursor:default"><span style="font-weight:700;font-size:13.5px">${x('language')}</span>${langSwitch()}</div></div>
     ${u.role === 'admin' ? `<div class="card" style="border-color:var(--coral)">${row(IC.shield, t('admin_panel'), '#/admin')}</div>` : ''}
     <button class="center" style="width:100%;color:var(--coral);font-weight:800;padding:10px 0 20px" data-logout>${x('log_out')}</button></div>`);
 }
@@ -601,6 +647,7 @@ document.addEventListener('click', async (e) => {
     else if (q('[data-back]')) { history.back(); }
     else if (q('[data-retry]')) { route(); }
     else if (q('[data-method]')) { methodSheet(); }
+    else if (q('[data-tour]')) { tour(); }
     else if ((el = q('[data-filter]'))) { await filterAction(el.dataset.filter); }
     else if ((el = q('[data-consent]'))) { const i = Number(el.dataset.consent); S.draft.consents[i] = !S.draft.consents[i]; dropFlow(); }
     else if (q('[data-drop-back]')) { if (S.draft.step > 1) { S.draft.step -= 1; dropFlow(); } else { S.draft = null; go('#/'); } }

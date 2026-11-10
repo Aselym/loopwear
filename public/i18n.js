@@ -133,6 +133,22 @@ Object.assign(DICT.tr, {
   e_title_required: 'Başlık yaz.', e_invalid_url: 'Bağlantı https:// ile başlamalı.', e_body_or_url: 'Bir haber bağlantısı ya da yazı metni ekle.',
 });
 Object.assign(DICT.tr, {
+  tour_skip: 'Geç', tour_next: 'İleri', tour_back: 'Geri', tour_done: 'Başlayalım', tour_replay: 'Uygulama turu', tour_patch: 'hesabına eklenir', tour_water: 'Su',
+  tour_t1: 'Merhaba, ben Loopy!', tour_b1: 'Dolabında bekleyen kıyafetlere yeni bir hayat veriyoruz. Giymediğini bırak, LoopPuan kazan, puanınla başka bir parça al.',
+  tour_t2: 'Kıyafetini bırak', tour_b2: 'Alttaki menünün ortasındaki Bırak düğmesine dokun. Koşulları onayla, kıyafetinin fotoğraflarını çek, bilgilerini gir ve istasyonunu seç.',
+  tour_t3: 'Puanını kazan', tour_b3: 'LoopAI puanını hesaplar ve hesabına ekler. Kıyafetini seçtiğin istasyona götürüp bırakma kodunu göster. Ekip onaylayınca ürünün Keşfet’te yayınlanır.',
+  tour_t4: 'Keşfet’ten seç', tour_b4: 'Beğendiğin ürünü LoopPuanınla rezerve et. Sonra istasyona gel, QR kodunu göster ve ürününü teslim al.',
+  tour_t5: 'Etkini gör', tour_b5: 'Etkim sayfasında döngüye kattığın kıyafetlerin karbon ve su karşılığını görürsün. Ana sayfadaki İklim gündemi’nde güncel yazılar seni bekliyor.',
+});
+Object.assign(DICT.en, {
+  tour_skip: 'Skip', tour_next: 'Next', tour_back: 'Back', tour_done: 'Let’s start', tour_replay: 'App tour', tour_patch: 'added to your account', tour_water: 'Water',
+  tour_t1: 'Hi, I’m Loopy!', tour_b1: 'We give the clothes waiting in your wardrobe a new life. Drop what you don’t wear, earn LoopPoints, and use them to pick another piece.',
+  tour_t2: 'Drop your clothes', tour_b2: 'Tap the Drop button in the middle of the bottom menu. Confirm the conditions, take photos of your item, enter its details and choose your station.',
+  tour_t3: 'Earn your points', tour_b3: 'LoopAI calculates your points and adds them to your account. Bring your item to the station you chose and show your drop code. Once the team approves it, your item appears on Discover.',
+  tour_t4: 'Pick from Discover', tour_b4: 'Reserve an item you like with your LoopPoints. Then come to the station, show your QR code and collect it.',
+  tour_t5: 'See your impact', tour_b5: 'The Impact page shows the carbon and water equivalent of the clothes you put back in the loop. Fresh reads are waiting in Climate agenda on the home page.',
+});
+Object.assign(DICT.tr, {
   a_listings: 'Keşfet ilanları', a_listings_body: 'Onaylanmış ve şu an Keşfet’te alınabilir duran ilanlar. Kaldırılan ilan Keşfet’ten çıkar, sahibine gerekçeyle bildirim gider.', a_listed_at: 'Yayına girdi', a_remove_listing: 'Keşfet’ten kaldır',
   a_preset_gone: 'Ürün artık istasyonda yok', a_preset_notfound: 'Ürün bulunamadı', n_item_removed: '{cat} ilanın Keşfet’ten kaldırıldı. Gerekçe: {reason}',
 });
