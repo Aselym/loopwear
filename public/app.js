@@ -101,7 +101,7 @@ function authForm(mode) {
 const TOUR_ART = [
   () => `<img src="${LOOPY.hero}" class="tour-loopy big" alt="">`,
   () => `<img src="${LOOPY.hero}" class="tour-loopy" alt=""><div class="tour-slots">${[IC.shirt, IC.shirt, IC.shirt, IC.doc].map((ic, i) => `<span class="tour-slot${i < 2 ? ' ok' : ''}">${ic}</span>`).join('')}</div>`,
-  () => `<img src="${LOOPY.face}" class="tour-head" alt=""><div class="tour-patch"><span class="tour-patch-ic">${IC.loop}</span><span><b>LoopPuan</b><i>${x('tour_patch')}</i></span></div>`,
+  () => `<img src="${LOOPY.face}" class="tour-head" alt=""><div class="tour-patch"><span class="tour-patch-ic">${IC.loop}</span><span><b>${x('points')}</b><i>${x('tour_patch')}</i></span></div>`,
   () => `<div class="tour-prod"><span class="tour-prod-img">${IC.shirt}<span class="tour-heart">${IC.heart2}</span></span><span class="tour-prod-line"></span><span class="tour-prod-line short"></span></div><img src="${LOOPY.hero}" class="tour-loopy" alt="">`,
   () => `<img src="${LOOPY.hero}" class="tour-loopy" alt=""><div class="tour-stats"><span class="tour-stat co2">${IC.cloud}<b>CO₂</b></span><span class="tour-stat water">${IC.drop}<b>${x('tour_water')}</b></span><span class="tour-stat news">${IC.leaf}<b>${x('blog_title')}</b></span></div>`,
 ];
@@ -512,7 +512,7 @@ async function profile() {
   const div = '<div class="divider" style="margin:0"></div>';
   screen(`${titleBar(t('profile'))}<div class="content bare">
     <div class="row gap16" style="margin-bottom:18px"><div style="width:66px;height:66px;border-radius:50%;background:#E7DFD0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:none;color:var(--navy)">${IC.userLg}</div><div><div style="font-weight:900;font-size:18px">${esc(u.display_name)}</div>${u.guest ? '' : `<div class="muted">${esc(u.email)}</div>`}</div></div>
-    <a class="card solid flat row between" href="#/wallet" style="background:#F1F4F0;text-decoration:none"><div><div style="font-size:26px;font-weight:900;color:var(--sage-dark)">${fmt(u.wallet_balance)} <span style="font-size:13px;color:var(--text2);font-weight:700">${x('points')}</span></div><p class="muted">${x('wallet_note')}</p></div><div style="width:40px;height:40px;border-radius:50%;background:#F8E6E6;display:flex;align-items:center;justify-content:center;color:var(--coral);flex:none">${IC.bars}</div></a>
+    ${pointsCard(u)}
     <h2 class="section-title">${x('account')}</h2>
     <div class="card">${row(IC.qr, t('my_code'), '#/qr/me/me')}${div}${row(IC.bars, t('wallet_history'), '#/wallet')}${div}${row(IC.bell, t('notifications'), '#/notifications')}${div}${row(IC.heart2, t('favorites'), '#/favorites')}${div}${row(IC.gift, t('gifts'), '#/gifts')}</div>
     <h2 class="section-title">LoopWear</h2>

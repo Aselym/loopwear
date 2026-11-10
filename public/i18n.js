@@ -171,9 +171,24 @@ Object.assign(DICT.en, {
   a_preset_gone: 'Item is no longer at the station', a_preset_notfound: 'Item could not be found', n_item_removed: 'Your {cat} listing was removed from Discover. Reason: {reason}',
 });
 Object.assign(DICT.en, {
-  blog_title: 'Climate news', blog_sub: 'Latest news and stories on the climate crisis, fashion and circular living.', blog_all: 'All posts', blog_read: 'Read the story', blog_more: 'Read more', blog_empty: 'No posts yet.', go_discover: 'Go to Discover',
-  a_blog: 'Climate news', a_blog_new: 'New post or news link', a_blog_title: 'Title', a_blog_date: 'Date', a_blog_source: 'Source', a_blog_url: 'News link', a_blog_summary: 'Short summary', a_blog_body: 'Post text', a_blog_body_hint: 'Write your own post here. For news, a link and summary are enough.', a_blog_image: 'Photo', a_blog_publish: 'Publish', a_blog_list: 'Published posts ({n})', a_blog_delete: 'Remove', a_blog_delete_q: 'This post will be removed from Climate news.',
-  e_title_required: 'Add a title.', e_invalid_url: 'The link must start with https://', e_body_or_url: 'Add a news link or post text.',
+  start: 'Start', notify_off: 'Notification off', impact_section: 'Impact summary', d_location: 'Location', d_status: 'Status',
+  cap_consent: 'Conditions', cap_photos: 'Photos', cap_info: 'Item details', cap_result: 'Points and impact', cap_station: 'Station',
+  info_body: 'Choose the main details that affect the points.', brand_note: 'Brand is not a scoring criterion.', see_points: 'See points and impact', choose_station: 'Choose LoopStation', points_how: 'How your points add up',
+  station_title: 'Choose LoopStation', station_body: 'Choose a point to drop at.', publish: 'Create drop code', analyzing: 'Saving your item', create_code: 'Show my drop code', loopy_tip_head: 'Loopy’s tip:',
+  drop_within: 'Valid for 24 hours', how_drop: 'How do I drop?', how_drop_1: 'Bring your clothes to the LoopStation', how_drop_2: 'Show the QR code to the staff', how_drop_3: 'Hand the item to the staff',
+  confirm_title: 'Confirm reservation', confirm_btn: 'Confirm reservation', tab_reserved: 'Reserved', tab_acquired: 'Acquired', tab_dropped: 'Dropped', favorites_empty: 'No favourites yet.',
+  how_built: 'How is this calculated?', how_built_1: 'Average item weight for the category', how_built_2: 'Reference value of the declared material', ref_total: 'Reference impact', account: 'My account',
+});
+Object.assign(DICT.en, {
+  analyzing: 'LoopAI is calculating your points', an_1: 'Reading your photos and details', an_2: 'Matching category and condition', an_3: 'Calculating your reference impact', an_4: 'Calculating the points you earn',
+  earned: 'Points you earned', ph_optional: 'Care label (optional)', photos_body: 'Front, back and detail photos are required. You can also add the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
+  result_note: 'Points added to your account. Your item appears on Discover once it’s approved.', n_item_published: '{cat} saved and {points} LoopPoints added to your account. It appears on Discover once approved.',
+  pending_note: 'Your item is awaiting approval. It appears on Discover once approved.',
+});
+Object.assign(DICT.en, {
+  ph_optional: 'Care label', photos_body: 'Photograph the front, back, a detail and the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
+  eq_car: '≈ {km} km by car', eq_water_days: '≈ {n} days of drinking water for one person', eq_water_years: '≈ {n} years of drinking water for one person', eq_bottles: '≈ {n} bottles of water',
+  method_eq: 'Comparisons are approximate: an average car is assumed to emit 0.17 kg CO₂e per km, and one person is assumed to drink 2 litres of water a day.',
 });
 Object.assign(DICT.en, {
   method_1: 'We use a default weight for each clothing type (for example 150 g for a T-shirt, 1,200 g for a coat) and the life-cycle values of the material you chose to find the reference CO₂ and water of a similar new item.',
@@ -183,22 +198,7 @@ Object.assign(DICT.en, {
   how_built_1: 'Default weight of the clothing type', how_built_2: 'Life-cycle value of the chosen material',
 });
 Object.assign(DICT.en, {
-  ph_optional: 'Care label', photos_body: 'Photograph the front, back, a detail and the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
-  eq_car: '≈ {km} km by car', eq_water_days: '≈ {n} days of drinking water for one person', eq_water_years: '≈ {n} years of drinking water for one person', eq_bottles: '≈ {n} bottles of water',
-  method_eq: 'Comparisons are approximate: an average car is assumed to emit 0.17 kg CO₂e per km, and one person is assumed to drink 2 litres of water a day.',
-});
-Object.assign(DICT.en, {
-  analyzing: 'LoopAI is calculating your points', an_1: 'Reading your photos and details', an_2: 'Matching category and condition', an_3: 'Calculating your reference impact', an_4: 'Calculating the points you earn',
-  earned: 'Points you earned', ph_optional: 'Care label (optional)', photos_body: 'Front, back and detail photos are required. You can also add the care label. Photos appear on the item page for other members, so make sure they show no personal information.',
-  result_note: 'Points added to your account. Your item appears on Discover once it’s approved.', n_item_published: '{cat} saved and {points} LoopPoints added to your account. It appears on Discover once approved.',
-  pending_note: 'Your item is awaiting approval. It appears on Discover once approved.',
-});
-Object.assign(DICT.en, {
-  start: 'Start', notify_off: 'Notification off', impact_section: 'Impact summary', d_location: 'Location', d_status: 'Status',
-  cap_consent: 'Conditions', cap_photos: 'Photos', cap_info: 'Item details', cap_result: 'Points and impact', cap_station: 'Station',
-  info_body: 'Choose the main details that affect the points.', brand_note: 'Brand is not a scoring criterion.', see_points: 'See points and impact', choose_station: 'Choose LoopStation', points_how: 'How your points add up',
-  station_title: 'Choose LoopStation', station_body: 'Choose a point to drop at.', publish: 'Create drop code', analyzing: 'Saving your item', create_code: 'Show my drop code', loopy_tip_head: 'Loopy’s tip:',
-  drop_within: 'Valid for 24 hours', how_drop: 'How do I drop?', how_drop_1: 'Bring your clothes to the LoopStation', how_drop_2: 'Show the QR code to the staff', how_drop_3: 'Hand the item to the staff',
-  confirm_title: 'Confirm reservation', confirm_btn: 'Confirm reservation', tab_reserved: 'Reserved', tab_acquired: 'Acquired', tab_dropped: 'Dropped', favorites_empty: 'No favourites yet.',
-  how_built: 'How is this calculated?', how_built_1: 'Average item weight for the category', how_built_2: 'Reference value of the declared material', ref_total: 'Reference impact', account: 'My account',
+  blog_title: 'Climate news', blog_sub: 'Latest news and stories on the climate crisis, fashion and circular living.', blog_all: 'All posts', blog_read: 'Read the story', blog_more: 'Read more', blog_empty: 'No posts yet.', go_discover: 'Go to Discover',
+  a_blog: 'Climate news', a_blog_new: 'New post or news link', a_blog_title: 'Title', a_blog_date: 'Date', a_blog_source: 'Source', a_blog_url: 'News link', a_blog_summary: 'Short summary', a_blog_body: 'Post text', a_blog_body_hint: 'Write your own post here. For news, a link and summary are enough.', a_blog_image: 'Photo', a_blog_publish: 'Publish', a_blog_list: 'Published posts ({n})', a_blog_delete: 'Remove', a_blog_delete_q: 'This post will be removed from Climate news.',
+  e_title_required: 'Add a title.', e_invalid_url: 'The link must start with https://', e_body_or_url: 'Add a news link or post text.',
 });
