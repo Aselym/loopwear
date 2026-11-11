@@ -426,3 +426,13 @@ test('/cop31: kayıt formu olmadan her ziyaretçiye ayrı hesap açılır', asyn
   const u = await member();
   assert.equal((await u.get('/api/me')).data.user.guest, false);
 });
+
+test('/tanitim tanıtım sayfası açılır, uygulamanın kendisinden bağlantı verilmez', async () => {
+  const c = new Client();
+  const r = await c.get('/tanitim');
+  assert.equal(r.status, 200);
+  assert.ok(String(r.data).includes('Dolabımızdaki görünmez yangın'));
+  assert.equal((await c.get('/assets/tanitim/kapak.jpg')).status, 200);
+  const { readFileSync } = await import('node:fs');
+  for (const f of ['app.js', 'core.js', 'admin.js', 'index.html']) assert.ok(!readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8').includes('tanitim'));
+});
