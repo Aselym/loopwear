@@ -68,6 +68,15 @@ export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPass
     }
     await db.q("INSERT INTO settings (key, value) VALUES ('blog_seed2','1') ON CONFLICT (key) DO NOTHING");
   }
+  const [keepsake] = await db.q("SELECT 1 FROM settings WHERE key='gift_hediyelik'");
+  if (!keepsake) {
+    await db.q(`INSERT INTO gifts (id, name_tr, name_en, points, stock, active, image, featured, desc_tr, desc_en)
+      VALUES ('hediyelik', 'LoopWear hediyeliği', 'LoopWear keepsake', 30, 10, TRUE, '/assets/hediyelik.jpg', TRUE, $1, $2) ON CONFLICT (id) DO NOTHING`, [
+      'El yapımı LoopWear figürü: renkli kapaklarıyla LoopStation ve yanında Loopy. Kaidesinde “Kıyafetleri döngüde, geleceği dengede tutuyoruz.” yazıyor.',
+      'A handmade LoopWear figure: a LoopStation with colourful doors and Loopy beside it. Its base reads “Kıyafetleri döngüde, geleceği dengede tutuyoruz.”',
+    ]);
+    await db.q("INSERT INTO settings (key, value) VALUES ('gift_hediyelik','1') ON CONFLICT (key) DO NOTHING");
+  }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
   if (!g) await db.q("INSERT INTO gifts (id, name_tr, name_en, points, stock) VALUES ($1,'LoopWear anahtarlık','LoopWear keychain',20,0)", [newId()]);
@@ -188,6 +197,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
   route('POST', '/api/auth/guest', pub, async ({ body, res, ip }) => {
     if (limited(`guest:${ip}`, 120)) throw new AppError('too_many', 429);
     const s = await L.getSettings(db);
+    const [fg] = await db.q('SELECT points FROM gifts WHERE featured AND active ORDER BY points LIMIT 1');
     const id = newId();
     const lang = body.lang === 'en' ? 'en' : 'tr';
     const hash = await hashPassword(randomBytes(24).toString('base64url'));
@@ -195,7 +205,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     await db.tx(async (t) => {
       await t.q('INSERT INTO users (id, email, password_hash, display_name, default_station_id, public_code, lang, is_guest) VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)',
         [id, `misafir-${id.toLowerCase()}@loopwear.invalid`, hash, lang === 'en' ? 'Guest' : 'Misafir', st?.id || null, `UQ-${randomBytes(12).toString('base64url')}`, lang]);
-      const pts = Number(s.starter_points) || 0;
+      const pts = fg ? fg.points : Number(s.starter_points) || 0;
       if (pts > 0) await L.moveWallet(t, id, pts, 'STARTER', { reason: 'starter_points' });
       await L.audit(t, id, 'user', id, 'register', null, 'guest', null);
     });
@@ -364,7 +374,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     return { post: postView(p) };
   });
 
-  route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock FROM gifts WHERE active ORDER BY points') }));
+  route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock, image, featured, desc_tr, desc_en FROM gifts WHERE active ORDER BY featured DESC, points') }));
   route('POST', '/api/gifts/:id/buy', member, async ({ user, params }) => L.buyGift(db, user.id, params.id));
 
   // ----- Yönetici -----

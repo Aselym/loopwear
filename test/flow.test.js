@@ -327,7 +327,8 @@ test('stant: başlangıç puanı kıyafete yetmez, hediyeliğe yeter; görevli k
   const owner = await member();
   const cheap = await ready(owner, { category: 'tshirt', condition: 'acceptable' });
   assert.equal((await v.post(`/api/items/${cheap.id}/reserve`)).data.error, 'insufficient_points');
-  const gifts = (await admin.get('/api/admin/gifts')).data.gifts;
+  await admin.post('/api/admin/gifts', { id: 'anahtarlik', name_tr: 'LoopWear anahtarlık', name_en: 'LoopWear keychain', points: 20, stock: 0 });
+  const gifts = (await admin.get('/api/admin/gifts')).data.gifts.filter((o) => o.id === 'anahtarlik');
   assert.equal((await v.post(`/api/gifts/${gifts[0].id}/buy`)).data.error, 'gift_unavailable');
   await admin.post('/api/admin/gifts', { ...gifts[0], stock: 1 });
   assert.equal((await v.post(`/api/gifts/${gifts[0].id}/buy`)).status, 200);
@@ -419,7 +420,7 @@ test('/cop31: kayıt formu olmadan her ziyaretçiye ayrı hesap açılır', asyn
   assert.equal(ua.guest, true);
   assert.equal(ua.display_name, 'Misafir');
   assert.equal(ub.display_name, 'Guest');
-  assert.equal(ua.wallet_balance, 20);
+  assert.equal(ua.wallet_balance, 30);
   assert.equal(ua.tour_seen, false);
   assert.equal((await a.get('/api/me')).data.user.id, ua.id);
   assert.equal((await a.get('/api/items')).status, 200);
@@ -435,4 +436,33 @@ test('/tanitim tanıtım sayfası açılır, uygulamanın kendisinden bağlantı
   assert.equal((await c.get('/assets/tanitim/kapak.jpg')).status, 200);
   const { readFileSync } = await import('node:fs');
   for (const f of ['app.js', 'core.js', 'admin.js', 'index.html']) assert.ok(!readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8').includes('tanitim'));
+});
+
+test('hediyelik: Keşfet’te öne çıkar; /cop31 hesabının puanı yalnızca ona yeter, QR ile teslim edilir', async () => {
+  const pub = new Client();
+  const g = (await pub.get('/api/gifts')).data.gifts[0];
+  assert.equal(g.id, 'hediyelik');
+  assert.equal(g.featured, true);
+  assert.equal(g.points, 30);
+  assert.equal(g.image, '/assets/hediyelik.jpg');
+  assert.equal((await pub.get('/assets/hediyelik.jpg')).status, 200);
+  const j = new Client();
+  const me = (await j.post('/api/auth/guest', { lang: 'tr' })).data.user;
+  assert.equal(me.wallet_balance, g.points);
+  // En ucuz ürün bile alınamaz
+  const owner = await member();
+  const cheap = await ready(owner, { category: 'tshirt', condition: 'acceptable' });
+  assert.ok(cheap.point_value > g.points);
+  assert.equal((await j.post(`/api/items/${cheap.id}/reserve`)).data.error, 'insufficient_points');
+  // Hediyelik alınır, puan sıfırlanır, ikincisi alınamaz
+  const { id } = (await j.post('/api/gifts/hediyelik/buy')).data;
+  assert.ok(id);
+  assert.equal(await balance(j), 0);
+  assert.equal((await j.post('/api/gifts/hediyelik/buy')).data.error, 'insufficient_points');
+  const token = (await j.get('/api/me/wardrobe')).data.gifts.find((o) => o.id === id).qr_token;
+  assert.equal((await admin.post('/api/admin/scan', { token })).data.type, 'gift');
+  assert.equal((await admin.post('/api/admin/scan/gift', { token, reason: 'Teslim edildi' })).status, 200);
+  // Stok paneldeki değerden düşer; normal üye 20 puanla başlar
+  assert.equal((await pub.get('/api/gifts')).data.gifts[0].stock, 9);
+  assert.equal(await balance(await member()), 20);
 });

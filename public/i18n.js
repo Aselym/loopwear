@@ -147,6 +147,12 @@ Object.assign(DICT.en, {
   consent_4: 'It isn’t underwear or socks; the pockets are empty and I confirm my item details are accurate.',
 });
 Object.assign(DICT.tr, {
+  gift_tag: 'Hediyelik', gift_note: 'Puanın hemen düşer. Sonra QR kodunu ekibe göster, hediyeliğini al.',
+});
+Object.assign(DICT.en, {
+  gift_tag: 'Keepsake', gift_note: 'Your points are deducted right away. Then show your QR code to the team and collect your keepsake.',
+});
+Object.assign(DICT.tr, {
   tour_skip: 'Geç', tour_next: 'İleri', tour_back: 'Geri', tour_done: 'Başlayalım', tour_replay: 'Uygulama turu', tour_patch: 'hesabına eklenir', tour_water: 'Su',
   tour_t1: 'Merhaba, ben Loopy!', tour_b1: 'Dolabında bekleyen kıyafetlere yeni bir hayat veriyoruz. Giymediğini bırak, LoopPuan kazan, puanınla başka bir parça al.',
   tour_t2: 'Kıyafetini bırak', tour_b2: 'Alttaki menünün ortasındaki Bırak düğmesine dokun. Koşulları onayla, kıyafetinin fotoğraflarını çek, bilgilerini gir ve istasyonunu seç.',
