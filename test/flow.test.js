@@ -431,7 +431,7 @@ test('/tanitim tanıtım sayfası açılır, uygulamanın kendisinden bağlantı
   const c = new Client();
   const r = await c.get('/tanitim');
   assert.equal(r.status, 200);
-  assert.ok(String(r.data).includes('Dolabımızdaki görünmez yangın'));
+  assert.ok(String(r.data).includes('Dolabımızdaki görünmez yangın') && String(r.data).includes('Boğaziçi Üniversitesi öğrencilerinin projesi'));
   assert.equal((await c.get('/assets/tanitim/kapak.jpg')).status, 200);
   const { readFileSync } = await import('node:fs');
   for (const f of ['app.js', 'core.js', 'admin.js', 'index.html']) assert.ok(!readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8').includes('tanitim'));
