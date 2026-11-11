@@ -68,10 +68,10 @@ a { color: inherit; }
 .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
 
 /* Bölümler ve sunumdaki renkli şeritler */
-section { padding: clamp(40px, 7vw, 88px) 0; }
+section.wrap { padding-top: clamp(36px, 6vw, 72px); padding-bottom: clamp(36px, 6vw, 72px); }
 .ribbon { display: inline-block; font: 800 13.5px var(--display); letter-spacing: .02em; color: var(--ink); padding: 8px 26px 8px 14px; border-radius: 0 99px 99px 0; margin: 0 0 16px calc(var(--gut) * -1); padding-left: calc(var(--gut) + 2px); background: var(--g-problem); }
 .ribbon.light { color: #fff; }
-.story .ribbon, .patch .ribbon,
+.story .ribbon, .patch .ribbon { margin-left: 0; padding-left: 14px; border-radius: 99px; }
 h2 { font-size: clamp(29px, 4.6vw, 48px); font-weight: 800; max-width: 22ch; }
 .sub { margin-top: 14px; color: var(--ink2); max-width: 58ch; }
 .grid { display: grid; gap: 14px; margin-top: 30px; }
