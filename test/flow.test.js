@@ -466,3 +466,9 @@ test('hediyelik: Keşfet’te öne çıkar; /cop31 hesabının puanı yalnızca 
   assert.equal((await pub.get('/api/gifts')).data.gifts[0].stock, 9);
   assert.equal(await balance(await member()), 20);
 });
+
+test('hediyeliğin adı LoopWear COP31 hatırası', async () => {
+  const g = (await new Client().get('/api/gifts')).data.gifts.find((o) => o.id === 'hediyelik');
+  assert.equal(g.name_tr, 'LoopWear COP31 hatırası');
+  assert.equal(g.name_en, 'LoopWear COP31 keepsake');
+});

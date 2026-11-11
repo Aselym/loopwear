@@ -71,11 +71,17 @@ export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPass
   const [keepsake] = await db.q("SELECT 1 FROM settings WHERE key='gift_hediyelik'");
   if (!keepsake) {
     await db.q(`INSERT INTO gifts (id, name_tr, name_en, points, stock, active, image, featured, desc_tr, desc_en)
-      VALUES ('hediyelik', 'LoopWear hediyeliği', 'LoopWear keepsake', 30, 10, TRUE, '/assets/hediyelik.jpg', TRUE, $1, $2) ON CONFLICT (id) DO NOTHING`, [
+      VALUES ('hediyelik', 'LoopWear COP31 hatırası', 'LoopWear COP31 keepsake', 30, 10, TRUE, '/assets/hediyelik.jpg', TRUE, $1, $2) ON CONFLICT (id) DO NOTHING`, [
       'El yapımı LoopWear figürü: renkli kapaklarıyla LoopStation ve yanında Loopy. Kaidesinde “Kıyafetleri döngüde, geleceği dengede tutuyoruz.” yazıyor.',
       'A handmade LoopWear figure: a LoopStation with colourful doors and Loopy beside it. Its base reads “Kıyafetleri döngüde, geleceği dengede tutuyoruz.”',
     ]);
     await db.q("INSERT INTO settings (key, value) VALUES ('gift_hediyelik','1') ON CONFLICT (key) DO NOTHING");
+  }
+  // Hediyeliğin adı: bir kez güncellenir, sonra panelden değişebilir
+  const [keepsakeName] = await db.q("SELECT 1 FROM settings WHERE key='gift_hediyelik_ad'");
+  if (!keepsakeName) {
+    await db.q("UPDATE gifts SET name_tr='LoopWear COP31 hatırası', name_en='LoopWear COP31 keepsake' WHERE id='hediyelik'");
+    await db.q("INSERT INTO settings (key, value) VALUES ('gift_hediyelik_ad','1') ON CONFLICT (key) DO NOTHING");
   }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
