@@ -340,14 +340,18 @@ export async function createReview(db, userId, reservationId, score, comment) {
 // ---------- Hediyelik ----------
 export async function buyGift(db, userId, giftId) {
   return db.tx(async (t) => {
-    const [g] = await t.q('UPDATE gifts SET stock=stock-1 WHERE id=$1 AND active AND stock>0 RETURNING *', [giftId]);
+    // Sınırsız hediyelikte stok düşmez ve tükenmez
+    const [g] = await t.q('UPDATE gifts SET stock = CASE WHEN unlimited THEN stock ELSE stock-1 END WHERE id=$1 AND active AND (unlimited OR stock>0) RETURNING *', [giftId]);
     if (!g) throw new AppError('gift_unavailable', 409);
     const [u] = await t.q('SELECT wallet_balance FROM users WHERE id=$1 FOR UPDATE', [userId]);
     if (u.wallet_balance < g.points) throw Object.assign(new AppError('insufficient_points', 409), { missing: g.points - u.wallet_balance });
     const id = newId();
-    await t.q("INSERT INTO gift_orders (id, gift_id, user_id, amount, status, qr_token) VALUES ($1,$2,$3,$4,'PENDING',$5)", [id, giftId, userId, g.points, qrToken('GF')]);
+    // Anında teslim edilen hediyelikte QR üretilmez, sipariş doğrudan tamamlanır
+    const status = g.instant ? 'REDEEMED' : 'PENDING';
+    await t.q(`INSERT INTO gift_orders (id, gift_id, user_id, amount, status, qr_token, redeemed_at) VALUES ($1,$2,$3,$4,$5,$6,${g.instant ? 'now()' : 'NULL'})`, [id, giftId, userId, g.points, status, g.instant ? null : qrToken('GF')]);
     await moveWallet(t, userId, -g.points, 'GIFT_SPEND', { reason: g.name_tr });
-    return { id };
+    if (g.instant) await audit(t, userId, 'gift_order', id, 'instant', null, 'REDEEMED', null);
+    return { id, status };
   });
 }
 

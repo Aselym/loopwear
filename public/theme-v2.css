@@ -307,3 +307,6 @@
 [data-theme="v2"] .gift-pill svg { width: 12px; height: 12px; }
 [data-theme="v2"] .gift-hero { border-radius: 24px; overflow: hidden; border: 2.5px solid var(--coral); box-shadow: 0 0 0 4px #F7DCD3; background: #EDE3D0; }
 [data-theme="v2"] .gift-hero img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+[data-theme="v2"] .gift-won { width: min(78%, 300px); animation: giftwin .7s var(--ease) both; }
+@keyframes giftwin { 0% { transform: scale(.6) rotate(-6deg); opacity: 0; } 60% { transform: scale(1.06) rotate(2deg); opacity: 1; } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { [data-theme="v2"] .gift-won { animation: none; } }

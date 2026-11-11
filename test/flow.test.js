@@ -438,7 +438,7 @@ test('/tanitim tanıtım sayfası açılır, uygulamanın kendisinden bağlantı
   for (const f of ['app.js', 'core.js', 'admin.js', 'index.html']) assert.ok(!readFileSync(new URL(`../public/${f}`, import.meta.url), 'utf8').includes('tanitim'));
 });
 
-test('hediyelik: Keşfet’te öne çıkar; /cop31 hesabının puanı yalnızca ona yeter, QR ile teslim edilir', async () => {
+test('hediyelik: Keşfet’te öne çıkar; /cop31 puanı yalnızca ona yeter; sınırsız ve anında teslim', async () => {
   const pub = new Client();
   const g = (await pub.get('/api/gifts')).data.gifts[0];
   assert.equal(g.id, 'hediyelik');
@@ -454,16 +454,30 @@ test('hediyelik: Keşfet’te öne çıkar; /cop31 hesabının puanı yalnızca 
   const cheap = await ready(owner, { category: 'tshirt', condition: 'acceptable' });
   assert.ok(cheap.point_value > g.points);
   assert.equal((await j.post(`/api/items/${cheap.id}/reserve`)).data.error, 'insufficient_points');
-  // Hediyelik alınır, puan sıfırlanır, ikincisi alınamaz
-  const { id } = (await j.post('/api/gifts/hediyelik/buy')).data;
-  assert.ok(id);
+  // Hediyelik alınır, puan sıfırlanır, aynı kişi ikincisini alamaz
+  const r = (await j.post('/api/gifts/hediyelik/buy')).data;
+  assert.ok(r.id);
+  assert.equal(r.status, 'REDEEMED');
   assert.equal(await balance(j), 0);
   assert.equal((await j.post('/api/gifts/hediyelik/buy')).data.error, 'insufficient_points');
-  const token = (await j.get('/api/me/wardrobe')).data.gifts.find((o) => o.id === id).qr_token;
-  assert.equal((await admin.post('/api/admin/scan', { token })).data.type, 'gift');
-  assert.equal((await admin.post('/api/admin/scan/gift', { token, reason: 'Teslim edildi' })).status, 200);
-  // Stok paneldeki değerden düşer; normal üye 20 puanla başlar
-  assert.equal((await pub.get('/api/gifts')).data.gifts[0].stock, 9);
+  // QR yok, yönetici onayı yok: sipariş doğrudan alınmış sayılır
+  const o = (await j.get('/api/me/wardrobe')).data.gifts.find((x) => x.id === r.id);
+  assert.equal(o.status, 'REDEEMED');
+  assert.equal(o.qr_token, null);
+  // Sınırsız: stok düşmez, ilan Keşfet'ten kalkmaz, her yeni kişi alabilir
+  for (let k = 0; k < 12; k += 1) {
+    const other = new Client();
+    await other.post('/api/auth/guest', { lang: 'en' });
+    assert.equal((await other.post('/api/gifts/hediyelik/buy')).data.status, 'REDEEMED');
+  }
+  const after = (await pub.get('/api/gifts')).data.gifts.find((x) => x.id === 'hediyelik');
+  assert.equal(after.stock, g.stock);
+  assert.equal(after.unlimited, true);
+  // Panelden stok 0 yapılsa bile alınabilir
+  await admin.post('/api/admin/gifts', { id: 'hediyelik', name_tr: after.name_tr, name_en: after.name_en, points: after.points, stock: 0 });
+  const late = new Client(); await late.post('/api/auth/guest', { lang: 'tr' });
+  assert.equal((await late.post('/api/gifts/hediyelik/buy')).data.status, 'REDEEMED');
+  await admin.post('/api/admin/gifts', { id: 'hediyelik', name_tr: after.name_tr, name_en: after.name_en, points: after.points, stock: g.stock });
   assert.equal(await balance(await member()), 20);
 });
 

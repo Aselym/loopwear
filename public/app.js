@@ -39,15 +39,31 @@ async function refreshUser() {
 // Keşfet'te öne çıkan hediyelik kartı: ürün kartıyla aynı yapı, çerçeveyle ayrışır
 let giftCache = null;
 async function featuredGift() {
-  try { const { gifts: g } = await api('/api/gifts'); giftCache = g; return g.find((o) => o.featured && o.stock > 0) || null; } catch { return null; }
+  try { const { gifts: g } = await api('/api/gifts'); giftCache = g; return g.find((o) => o.featured && giftOpen(o)) || null; } catch { return null; }
 }
 const giftName = (o) => (S.lang === 'en' ? o.name_en : o.name_tr);
+const giftOpen = (o) => o.unlimited || o.stock > 0;
 function giftCard(o) {
   return `<a class="pcard gift-card" href="#/gift/${esc(o.id)}" aria-label="${esc(giftName(o))}">
     <div class="prod-illustration"><img loading="lazy" src="${esc(o.image || LOOPY.face)}" alt=""></div>
     <div class="pb"><div class="pn">${esc(giftName(o))}</div><div class="pp">${fmt(o.points)} ${x('points')}</div><span class="pill gift-pill">${IC.gift}${x('gift_tag')}</span></div>
   </a>`;
 }
+async function giftDone(id) {
+  let o = (giftCache || []).find((i) => i.id === id);
+  if (!o) { try { o = (await api('/api/gifts')).gifts.find((i) => i.id === id); } catch { /* aşağıda */ } }
+  if (!o) { go('#/'); return; }
+  const name = giftName(o);
+  screen(`<div class="content bare center-col" style="padding-top:calc(26px + var(--safe-t))">
+    <div class="gift-hero gift-won"><img src="${esc(o.image || LOOPY.hero)}" alt="${esc(name)}"></div>
+    <span class="pill gift-pill" style="margin-top:16px">${IC.gift}${x('gift_tag')}</span>
+    <h1 style="margin:10px 0 6px">${x('gift_won_title')}</h1>
+    <p class="muted" style="max-width:320px">${x('gift_won_body', { name, n: fmt(o.points) })}</p>
+    <div class="card solid flat earned" style="width:100%;margin-top:16px">${IC.checkLg}<div style="font-weight:900;font-size:17px;margin-top:6px">${esc(name)}</div><div class="muted">${x('gift_won_note')}</div></div>
+  </div><div class="footer-bar"><a class="btn green" href="#/impact">${x('go_impact')}</a><a class="btn line" href="#/">${x('go_home')}</a></div>`);
+  if (S.lastGift?.id === id && S.lastGift.celebrate) { S.lastGift.celebrate = false; confetti(90); setTimeout(() => confetti(60), 650); }
+}
+
 async function giftDetail(id) {
   screen(`<div class="content bare">${skeleton()}</div>`);
   let o;
@@ -57,13 +73,13 @@ async function giftDetail(id) {
   const name = giftName(o);
   screen(`${titleBar(name)}<div class="content bare">
     <div class="gift-hero"><img src="${esc(o.image || LOOPY.hero)}" alt="${esc(name)}"></div>
-    <div class="row" style="flex-wrap:wrap;gap:6px;margin:14px 0 8px"><span class="pill gift-pill">${IC.gift}${x('gift_tag')}</span>${o.stock > 0 ? '' : `<span class="pill p-bad">${x('stock_out')}</span>`}</div>
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin:14px 0 8px"><span class="pill gift-pill">${IC.gift}${x('gift_tag')}</span>${giftOpen(o) ? '' : `<span class="pill p-bad">${x('stock_out')}</span>`}</div>
     <h1 class="page-title" style="margin:0 0 8px">${esc(name)}</h1>
     ${(S.lang === 'en' ? o.desc_en : o.desc_tr) ? `<p class="muted" style="margin-bottom:14px">${esc(S.lang === 'en' ? o.desc_en : o.desc_tr)}</p>` : ''}
     <div class="card"><div class="fin"><span class="muted">${x('current_balance')}</span><span class="strong">${fmt(bal)} ${x('points')}</span></div><div class="fin"><span class="muted">${x('this_item')}</span><span class="strong" style="color:var(--coral)">−${fmt(o.points)} ${x('points')}</span></div>
       ${short > 0 ? '' : `<div class="divider"></div><div class="fin"><span class="strong">${x('new_balance')}</span><span style="font-weight:900;color:var(--sage-dark);font-size:16px">${fmt(bal - o.points)} ${x('points')}</span></div>`}</div>
     ${short > 0 ? `<p class="err">${x('missing_points', { n: short })}</p>` : `<p class="footnote">${x('gift_note')}</p>`}
-  </div><div class="footer-bar">${o.stock <= 0 ? '' : short > 0 ? `<a class="btn" href="#/drop">${x('drop_cta')}</a>` : `<button class="btn green" data-gift="${esc(o.id)}" data-pts="${o.points}" data-name="${esc(name)}">${x('buy_gift')}</button>`}<div class="center"><button class="link" style="color:var(--text2)" data-back>${x('cancel')}</button></div></div>`);
+  </div><div class="footer-bar">${!giftOpen(o) ? '' : short > 0 ? `<a class="btn" href="#/drop">${x('drop_cta')}</a>` : `<button class="btn green" data-gift="${esc(o.id)}" data-pts="${o.points}" data-name="${esc(name)}">${x('buy_gift')}</button>`}<div class="center"><button class="link" style="color:var(--text2)" data-back>${x('cancel')}</button></div></div>`);
 }
 
 function itemCard(it) {
@@ -199,7 +215,7 @@ async function home() {
     box.innerHTML = fresh.length || gift
       ? `<div class="grid2">${gift ? giftCard(gift) : ''}${fresh.map(itemCard).join('')}</div><a class="btn line navy" href="#/discover" style="margin-top:12px">${x('go_discover')}</a>`
       : `<div class="card center stack"><h3>${x('no_items_title')}</h3><p class="muted">${x('no_items_body')}</p><a class="btn" href="#/drop">${x('drop_cta')}</a></div>`;
-    if (gifts.gifts.some((g) => g.stock > 0)) document.getElementById('giftCard').innerHTML = `<a class="card solid flat row between" href="#/gifts" style="background:#FBF4EC;text-decoration:none;margin-top:14px"><div><div style="font-weight:900;font-size:14.5px">${x('gifts_card_title')}</div><p class="muted" style="margin-top:2px">${x('gifts_card_body')}</p></div>${IC.chevronRight}</a>`;
+    if (gifts.gifts.some(giftOpen)) document.getElementById('giftCard').innerHTML = `<a class="card solid flat row between" href="#/gifts" style="background:#FBF4EC;text-decoration:none;margin-top:14px"><div><div style="font-weight:900;font-size:14.5px">${x('gifts_card_title')}</div><p class="muted" style="margin-top:2px">${x('gifts_card_body')}</p></div>${IC.chevronRight}</a>`;
     document.getElementById('impactCard').innerHTML = `<a class="card solid flat row gap12" href="#/impact" style="background:#F5F1E6;text-decoration:none">${IC.leafCircle}<div><div style="font-weight:900;font-size:14.5px">${imp.total ? x('impact_summary', { n: imp.total }) : x('impact_title')}</div><p class="muted" style="margin-top:2px">${imp.total ? `${x('ref_label')}: ${imp.co2.count ? `${fmt(imp.co2.sum, 1)} kg CO₂e` : x('data_soon')}` : x('impact_summary_none')}</p></div></a>`;
   } catch { const b = document.getElementById('fresh'); if (b) b.innerHTML = errorBox(); }
 }
@@ -614,15 +630,16 @@ async function gifts() {
   screen(`${titleBar(t('gifts'))}<div class="content bare" id="gf">${skeleton()}</div>`);
   try {
     const { gifts: g } = await api('/api/gifts');
-    document.getElementById('gf').innerHTML = g.length ? `<p class="muted" style="margin-bottom:12px">${x('current_balance')}: <b>${fmt(S.user.wallet_balance)} ${x('points')}</b></p>${g.map((o) => `<div class="card row gap12"><img class="thumb ${o.image ? '' : 'mascot'}" src="${esc(o.image || LOOPY.face)}" alt=""><div style="flex:1"><div style="font-weight:900;font-size:14.5px">${esc(S.lang === 'en' ? o.name_en : o.name_tr)}</div><div style="font-weight:800;color:var(--sage-dark);font-size:13px">${fmt(o.points)} ${x('points')}</div><div class="actions">${o.stock > 0 ? `<button class="btn small green" data-gift="${esc(o.id)}" data-pts="${o.points}" data-name="${esc(S.lang === 'en' ? o.name_en : o.name_tr)}">${x('buy_gift')}</button>` : `<span class="pill p-bad">${x('stock_out')}</span>`}</div></div></div>`).join('')}` : `<div class="card center"><p class="muted">${x('gift_empty')}</p></div>`;
+    document.getElementById('gf').innerHTML = g.length ? `<p class="muted" style="margin-bottom:12px">${x('current_balance')}: <b>${fmt(S.user.wallet_balance)} ${x('points')}</b></p>${g.map((o) => `<div class="card row gap12"><img class="thumb ${o.image ? '' : 'mascot'}" src="${esc(o.image || LOOPY.face)}" alt=""><div style="flex:1"><div style="font-weight:900;font-size:14.5px">${esc(S.lang === 'en' ? o.name_en : o.name_tr)}</div><div style="font-weight:800;color:var(--sage-dark);font-size:13px">${fmt(o.points)} ${x('points')}</div><div class="actions">${giftOpen(o) ? `<button class="btn small green" data-gift="${esc(o.id)}" data-pts="${o.points}" data-name="${esc(S.lang === 'en' ? o.name_en : o.name_tr)}">${x('buy_gift')}</button>` : `<span class="pill p-bad">${x('stock_out')}</span>`}</div></div></div>`).join('')}` : `<div class="card center"><p class="muted">${x('gift_empty')}</p></div>`;
   } catch { document.getElementById('gf').innerHTML = errorBox(); }
 }
 async function buyGift(btn) {
   if (S.user.wallet_balance < Number(btn.dataset.pts)) { toast(t('missing_points', { n: Number(btn.dataset.pts) - S.user.wallet_balance })); return; }
   if (!await confirmSheet(btn.dataset.name, t('gift_q', { name: btn.dataset.name, n: btn.dataset.pts }), t('buy_gift'))) return;
   try {
-    const { id } = await post(`/api/gifts/${btn.dataset.gift}/buy`);
+    const { id, status } = await post(`/api/gifts/${btn.dataset.gift}/buy`);
     await refreshUser();
+    if (status === 'REDEEMED') { S.lastGift = { id: btn.dataset.gift, order: id, celebrate: true }; go(`#/gift-done/${btn.dataset.gift}`); return; }
     confetti();
     go(`#/qr/gift/${id}`);
   } catch (e) { toast(errText(e)); }
@@ -656,6 +673,7 @@ async function route() {
   }
   if (head === 'item') return itemDetail(a);
   if (head === 'gift') return giftDetail(a);
+  if (head === 'gift-done') return giftDone(a);
   if (head === 'blog') return a ? blogPost(a) : blog();
   if (head === 'reserve') return reserveScreen(a);
   if (head === 'qr') return qrScreen(a, b);
