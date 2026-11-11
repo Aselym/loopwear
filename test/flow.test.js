@@ -486,3 +486,20 @@ test('hediyeliğin adı LoopWear COP31 hatırası', async () => {
   assert.equal(g.name_tr, 'LoopWear COP31 hatırası');
   assert.equal(g.name_en, 'LoopWear COP31 keepsake');
 });
+
+test('hatıranın ortalama etkisi var; alan kişinin Etkim toplamına eklenir', async () => {
+  const g = (await new Client().get('/api/gifts')).data.gifts.find((o) => o.id === 'hediyelik');
+  assert.ok(g.impact_co2 > 0 && g.impact_water > 0);
+  const j = new Client(); await j.post('/api/auth/guest', { lang: 'tr' });
+  const before = (await j.get('/api/me/impact')).data;
+  assert.equal(before.total, 0);
+  assert.equal(before.co2.sum, 0);
+  await j.post('/api/gifts/hediyelik/buy');
+  const d = (await j.get('/api/me/impact')).data;
+  assert.equal(d.total, 0);
+  assert.equal(d.acquired, 1);
+  assert.equal(d.co2.sum, g.impact_co2);
+  assert.equal(d.water.sum, g.impact_water);
+  assert.equal(d.gifts.length, 1);
+  assert.equal(d.gifts[0].gift_id, 'hediyelik');
+});

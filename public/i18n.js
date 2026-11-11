@@ -148,10 +148,12 @@ Object.assign(DICT.en, {
 });
 Object.assign(DICT.tr, {
   gift_tag: 'Hediyelik', gift_note: 'Puanın hemen düşer ve ürün hemen senin olur.',
+  my_gifts: 'Edindiğim hediyelikler', gift_impact_title: 'Ortalama referans etki', gift_impact_note: 'Ortalama referans etki', gift_impact_added: 'Bu etki Etkim sayfana eklendi.',
   gift_won_title: 'Tebrikler, aldın!', gift_won_body: '{name} artık senin. {n} LoopPuan hesabından düştü.', gift_won_note: 'Satın alındı', go_home: 'Ana sayfaya dön',
 });
 Object.assign(DICT.en, {
   gift_tag: 'Keepsake', gift_note: 'Your points are deducted right away and the item is yours straight away.',
+  my_gifts: 'Keepsakes I got', gift_impact_title: 'Average reference impact', gift_impact_note: 'Average reference impact', gift_impact_added: 'This impact was added to your Impact page.',
   gift_won_title: 'Congratulations, it’s yours!', gift_won_body: '{name} is now yours. {n} LoopPoints were deducted from your account.', gift_won_note: 'Purchased', go_home: 'Back to home',
 });
 Object.assign(DICT.tr, {

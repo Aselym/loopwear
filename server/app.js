@@ -89,6 +89,19 @@ export async function seed(db, { adminEmail = process.env.ADMIN_EMAIL, adminPass
     await db.q("UPDATE gifts SET unlimited=TRUE, instant=TRUE, active=TRUE WHERE id='hediyelik'");
     await db.q("INSERT INTO settings (key, value) VALUES ('gift_hediyelik_sinirsiz','1') ON CONFLICT (key) DO NOTHING");
   }
+  // Hatıranın etkisi: katalogdaki geçerli kıyafet türü × materyal eşleşmelerinin ortalaması
+  const [keepsakeImpact] = await db.q("SELECT 1 FROM settings WHERE key='gift_hediyelik_etki'");
+  if (!keepsakeImpact) {
+    const cat = JSON.parse(readFileSync(new URL('./catalog.json', import.meta.url), 'utf8'));
+    const ok = Object.entries(cat.impacts).filter(([k]) => {
+      const [c, m] = k.split('|');
+      const cc = cat.categories.find((x) => x.id === c); const mm = cat.materials.find((x) => x.id === m);
+      return cc && mm && !cc.retired && !mm.retired && m !== 'unknown';
+    }).map(([, v]) => v);
+    const avg = (i) => ok.reduce((s, v) => s + v[i], 0) / ok.length;
+    await db.q("UPDATE gifts SET impact_co2=$1, impact_water=$2 WHERE id='hediyelik'", [Math.round(avg(0) * 10) / 10, Math.round(avg(1))]);
+    await db.q("INSERT INTO settings (key, value) VALUES ('gift_hediyelik_etki','1') ON CONFLICT (key) DO NOTHING");
+  }
   for (const [k, v] of Object.entries(L.DEFAULT_SETTINGS)) await db.q('INSERT INTO settings (key, value) VALUES ($1,$2) ON CONFLICT (key) DO NOTHING', [k, v]);
   const [g] = await db.q('SELECT id FROM gifts LIMIT 1');
   if (!g) await db.q("INSERT INTO gifts (id, name_tr, name_en, points, stock) VALUES ($1,'LoopWear anahtarlık','LoopWear keychain',20,0)", [newId()]);
@@ -357,10 +370,13 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     const water = items.filter((i) => i.impact?.water != null);
     const [{ n: completed }] = await db.q("SELECT count(*)::int AS n FROM items WHERE owner_id=$1 AND status='COMPLETED'", [user.id]);
     const [{ n: acquired }] = await db.q("SELECT count(*)::int AS n FROM reservations WHERE buyer_id=$1 AND status='COMPLETED'", [user.id]);
+    const gifts = await db.q(`SELECT o.id, o.created_at, g.id AS gift_id, g.name_tr, g.name_en, g.image, g.impact_co2 AS co2, g.impact_water AS water
+      FROM gift_orders o JOIN gifts g ON g.id=o.gift_id WHERE o.user_id=$1 AND o.status='REDEEMED' AND g.impact_co2 IS NOT NULL ORDER BY o.created_at DESC`, [user.id]);
+    const gCo2 = gifts.reduce((s, g) => s + g.co2, 0); const gWater = gifts.reduce((s, g) => s + (g.water || 0), 0);
     return {
-      items, total: items.length, completed, acquired,
-      co2: { sum: co2.reduce((s, i) => s + i.impact.co2, 0), count: co2.length },
-      water: { sum: water.reduce((s, i) => s + i.impact.water, 0), count: water.length },
+      items, gifts, total: items.length, completed, acquired: acquired + gifts.length,
+      co2: { sum: co2.reduce((s, i) => s + i.impact.co2, 0) + gCo2, count: co2.length + gifts.length },
+      water: { sum: water.reduce((s, i) => s + i.impact.water, 0) + gWater, count: water.length + gifts.length },
     };
   });
 
@@ -386,7 +402,7 @@ export function createApp(db, { secureCookie = process.env.NODE_ENV === 'product
     return { post: postView(p) };
   });
 
-  route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock, image, featured, desc_tr, desc_en, unlimited, instant FROM gifts WHERE active ORDER BY featured DESC, points') }));
+  route('GET', '/api/gifts', pub, async () => ({ gifts: await db.q('SELECT id, name_tr, name_en, points, stock, image, featured, desc_tr, desc_en, unlimited, instant, impact_co2, impact_water FROM gifts WHERE active ORDER BY featured DESC, points') }));
   route('POST', '/api/gifts/:id/buy', member, async ({ user, params }) => L.buyGift(db, user.id, params.id));
 
   // ----- Yönetici -----
