@@ -27,7 +27,6 @@
   --g-kaynak: linear-gradient(90deg, #0D1E3A, #1F5E86 55%, #F2C46B);
   --g-yol: linear-gradient(90deg, #F6E13C, #A6E04A 60%, #E9F7C9);
   --g-buyume: linear-gradient(90deg, #A9D3F5, #DCEBFA 70%, #F5F8FC);
-  --g-etki: linear-gradient(90deg, #8BE04A, #F2D33C 60%, #F5913B);
   --g-kapak: linear-gradient(100deg, #63BBD6 0%, #8FCDB4 38%, #B9D595 68%, #EFDB6C 100%);
 }
 * { box-sizing: border-box; }
@@ -72,7 +71,7 @@ a { color: inherit; }
 section { padding: clamp(40px, 7vw, 88px) 0; }
 .ribbon { display: inline-block; font: 800 13.5px var(--display); letter-spacing: .02em; color: var(--ink); padding: 8px 26px 8px 14px; border-radius: 0 99px 99px 0; margin: 0 0 16px calc(var(--gut) * -1); padding-left: calc(var(--gut) + 2px); background: var(--g-problem); }
 .ribbon.light { color: #fff; }
-.story .ribbon, .patch .ribbon, .impact .ribbon { margin-left: 0; padding-left: 14px; border-radius: 99px; }
+.story .ribbon, .patch .ribbon,
 h2 { font-size: clamp(29px, 4.6vw, 48px); font-weight: 800; max-width: 22ch; }
 .sub { margin-top: 14px; color: var(--ink2); max-width: 58ch; }
 .grid { display: grid; gap: 14px; margin-top: 30px; }
@@ -161,23 +160,6 @@ h2 { font-size: clamp(29px, 4.6vw, 48px); font-weight: 800; max-width: 22ch; }
 .route li::before { content: counter(r, decimal-leading-zero); width: 42px; height: 42px; flex: none; border-radius: 50%; border: 3px solid var(--coral); color: var(--ink); background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 15px; }
 .two h3.h { font-size: 24px; font-weight: 800; }
 
-/* Etki */
-.impact { background: var(--sage); color: #fff; border-radius: clamp(24px, 4vw, 44px); padding: clamp(28px, 5vw, 60px); position: relative; }
-.impact::after { content: ""; position: absolute; inset: 12px; border-radius: clamp(14px, 3vw, 34px); border: 1.5px dashed rgba(255,255,255,.45); pointer-events: none; }
-.impact .ribbon { background: var(--g-etki); }
-.flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 28px; }
-.flow div { background: rgba(255,255,255,.12); border-radius: 18px; padding: 18px; }
-.flow b { display: block; font: 900 clamp(36px, 5.4vw, 58px)/1 var(--display); letter-spacing: -.04em; }
-.flow span { display: block; margin-top: 8px; font-size: 15px; color: #E4F1E7; line-height: 1.3; }
-.outs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
-.outs div { background: var(--surface); color: var(--ink); border-radius: 18px; padding: 20px; }
-.outs b { display: block; font: 900 clamp(30px, 4.6vw, 48px)/1 var(--display); letter-spacing: -.04em; color: var(--sage); }
-.outs span { display: block; margin-top: 8px; font-size: 15px; color: var(--ink2); }
-.formula { margin-top: 22px; font-size: 14.5px; color: #E4F1E7; max-width: 70ch; }
-.formula code { display: inline-block; font: 700 16px ui-monospace, Consolas, monospace; background: rgba(0,0,0,.18); padding: 7px 12px; border-radius: 10px; margin-bottom: 8px; color: #fff; }
-.tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.tags span { border: 1.5px solid rgba(255,255,255,.55); border-radius: 99px; padding: 7px 14px; font: 700 14.5px var(--display); }
-
 /* Kapanış: sunumun son slaydı gibi */
 .end { background: var(--g-kapak); border-radius: clamp(24px, 4vw, 44px); padding: clamp(28px, 5vw, 56px); display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; overflow: hidden; }
 .end .logo { width: min(420px, 100%); }
@@ -197,13 +179,11 @@ footer a { color: var(--ink2); }
   .layers > div { grid-template-columns: 46px 1fr; } .layers p { grid-column: 2; }
   .layers .n { grid-row: span 2; align-self: start; }
   .g2 { grid-template-columns: 1fr; }
-  .flow { grid-template-columns: 1fr; } .flow div { display: flex; align-items: baseline; gap: 14px; } .flow span { margin: 0; }
 }
 @media (max-width: 540px) {
   body { font-size: 16px; }
   .g3, .g4 { grid-template-columns: 1fr; }
   .card.h { display: grid; grid-template-columns: 64px 1fr; gap: 0 16px; align-items: center; } .card.h img.ic { height: 58px; margin: 0; grid-row: span 2; justify-self: center; }
-  .outs { grid-template-columns: 1fr; }
   .patch-top { grid-template-columns: 1fr; } .fire { width: 130px; order: -1; }
   .timeline li { grid-template-columns: 1fr; gap: 2px; }
   .end { grid-template-columns: 1fr; } .end img.loopy { justify-self: center; }
@@ -358,24 +338,6 @@ footer a { color: var(--ink2); }
   <div class="grid g2 two">
     <div class="card"><h3 class="h" data-en="Revenue model">Gelir modeli</h3><div class="chips"><span data-en="Setup and activation fee">Kurulum ve aktivasyon bedeli</span><span data-en="Locker sale or rental">Locker satışı veya kiralaması</span><span data-en="Coupon and advertising revenue">Kupon ve reklam geliri</span><span data-en="Anonymous institutional insight">Anonim kurumsal içgörü</span></div></div>
     <div class="card"><h3 class="h" data-en="Scaling route">Ölçeklenme rotası</h3><ol class="route"><li data-en="Boğaziçi pilot">Boğaziçi pilotu</li><li data-en="Universities across Türkiye">Türkiye’deki üniversiteler</li><li data-en="Local governments">Yerel yönetimler</li></ol></div>
-  </div>
-</section>
-
-<section class="wrap" id="etki">
-  <div class="impact">
-    <span class="ribbon" data-en="Scalable impact">Ölçeklenebilir etki</span>
-    <h2 data-en="A scenario at the scale of 1,000 items">1.000 ürünlük ölçek senaryosu</h2>
-    <div class="flow">
-      <div><b>600</b><span data-en="items enter circulation">ürün dolaşıma girer</span></div>
-      <div><b>480</b><span data-en="items have their use confirmed">ürünün kullanımı doğrulanır</span></div>
-      <div><b>144</b><span data-en="new purchases’ worth of substitution">yeni ürün alımına eşdeğer ikame oluşur</span></div>
-    </div>
-    <div class="outs">
-      <div><b data-en="≈ 1.6 tonnes CO₂e">≈ 1,6 ton CO₂e</b><span data-en="can be avoided, as a gross figure">brüt olarak önlenebilir</span></div>
-      <div><b data-en="≈ 54,600 litres">≈ 54.600 litre</b><span data-en="of blue water use can be avoided, as a gross figure">mavi su kullanımı brüt olarak önlenebilir</span></div>
-    </div>
-    <p class="formula"><code>Σ [ N × D × (EFnew − EFreuse) ]</code><br><span data-en="N: items put back into circulation · D: displacement rate · EF: life-cycle emission factors">N: yeniden dolaşıma giren ürün · D: ikame oranı (displacement rate) · EF: yaşam döngüsü emisyon faktörleri</span></p>
-    <div class="tags"><span data-en="Substituting new production">Yeni üretimin ikamesi</span><span data-en="Lower carbon impact">Karbon etkisinin azalması</span><span data-en="Lower blue water use">Mavi su kullanımının azalması</span><span data-en="Preventing textile waste">Tekstil atığının önlenmesi</span></div>
   </div>
 </section>
 
